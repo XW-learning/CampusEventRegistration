@@ -1,0 +1,18 @@
+/* src/main/webapp/static/css/style.css */
+
+/* 全局字体设置 */
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* 登录页背景纹理 */
+.login-bg {
+    background-color: #f3f4f6;
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* 隐藏滚动条 (如果有需要) */
+body::-webkit-scrollbar {
+    display: none;
+}

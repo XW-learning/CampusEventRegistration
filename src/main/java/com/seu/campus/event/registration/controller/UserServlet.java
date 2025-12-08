@@ -5,9 +5,9 @@ import com.seu.campus.event.registration.model.User;
 import com.seu.campus.event.registration.service.UserService;
 import com.seu.campus.event.registration.service.impl.UserServiceImpl;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.Map;
 @WebServlet(name = "user", value = "/user")
 public class UserServlet extends HttpServlet {
     // 业务层
-    private UserService userService = new UserServiceImpl();
+    private final UserService userService = new UserServiceImpl();
     // json工具
     private final Gson gson = new Gson();
 
