@@ -16,3 +16,24 @@ body {
 body::-webkit-scrollbar {
     display: none;
 }
+
+.flatpickr-time .flatpickr-time-separator {
+    display: none; /* 隐藏原生的冒号 */
+}
+.flatpickr-hour::after {
+    content: "时";
+    font-size: 12px;
+    color: #666;
+    margin-left: 2px;
+}
+.flatpickr-minute::after {
+    content: "分";
+    font-size: 12px;
+    color: #666;
+    margin-left: 2px;
+}
+/* 让输入框也是白底，看起来更干净 */
+input.date-picker {
+    background-color: white !important;
+    cursor: pointer;
+}

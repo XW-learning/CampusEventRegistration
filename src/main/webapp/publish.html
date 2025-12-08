@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布新活动 - 校园活动平台</title>
+    <link rel="icon" type="image/png" href="static/images/my_icon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="static/js/libs/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="static/css/libs/flatpickr.min.css">
+    <link rel="stylesheet" href="static/css/libs/airbnb.css">
+
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body class="bg-gray-50 font-sans">
+
+<header class="nav-glass fixed w-full top-0 z-50 shadow-sm">
+    <div class="container mx-auto px-6 h-[60px] flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">校</div>
+                <span class="text-xl font-bold text-gray-700 tracking-wide">校园活动平台</span>
+            </a>
+        </div>
+        <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="text-gray-600 hover:text-blue-500 transition">首页</a>
+            <span class="text-blue-600 font-medium border-b-2 border-blue-600">发布活动</span>
+        </nav>
+        <div></div>
+    </div>
+</header>
+
+<div class="h-[60px]"></div>
+
+<main class="container mx-auto px-6 py-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md border border-gray-100 p-8">
+        <div class="mb-6 border-b pb-4">
+            <h1 class="text-2xl font-bold text-gray-800">✨ 发布校园活动</h1>
+            <p class="text-sm text-gray-500 mt-1">填写下方信息，召集伙伴们一起参与！</p>
+        </div>
+
+        <form id="publish-form" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">活动标题 <span class="text-red-500">*</span></label>
+                <input type="text" id="p-title" placeholder="例如：第十届校园编程马拉松"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">活动分类</label>
+                    <select id="p-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                        <option value="学术讲座">📚 学术讲座</option>
+                        <option value="体育竞技">🏀 体育竞技</option>
+                        <option value="文艺汇演">🎵 文艺汇演</option>
+                        <option value="社团活动">🚩 社团活动</option>
+                        <option value="公益志愿">❤️ 公益志愿</option>
+                        <option value="其他">🌈 其他</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">活动地点 <span class="text-red-500">*</span></label>
+                    <input type="text" id="p-location" placeholder="例如：大活 302 / 操场"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">开始时间</label>
+                    <input type="text" id="p-startTime" class="date-picker w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" placeholder="请选择开始时间">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">结束时间</label>
+                    <input type="text" id="p-endTime" class="date-picker w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" placeholder="请选择结束时间">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1 text-red-600">报名截止</label>
+                    <input type="text" id="p-regDeadline" class="date-picker w-full px-4 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 text-sm" placeholder="请选择截止时间">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">活动详情</label>
+                <textarea id="p-detail" rows="5" placeholder="请详细描述活动流程、嘉宾信息、注意事项等..."
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition resize-none"></textarea>
+            </div>
+
+            <div class="pt-4">
+                <button type="button" onclick="submitEvent()"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 active:scale-[0.99]">
+                    🚀 立即发布活动
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+<script src="static/js/libs/flatpickr.js"></script>
+<script src="static/js/libs/zh.js"></script>
+<script src="static/js/publish.js"></script>
+</body>
+</html>
