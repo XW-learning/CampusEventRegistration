@@ -43,6 +43,7 @@ public class DBUtil {
 
     /**
      * 通用增删改方法 (INSERT, UPDATE, DELETE)
+     *
      * @param sql    SQL 语句 (其中参数用 ? 占位)
      * @param params 参数数组，对应 SQL 中的 ?
      * @return 受影响的行数
@@ -77,6 +78,7 @@ public class DBUtil {
 
     /**
      * 通用查询方法 (SELECT) - 利用反射封装结果集
+     *
      * @param sql    SQL 语句
      * @param clazz  实体类的 Class 对象 (例如 User.class)
      * @param params SQL 参数
@@ -124,9 +126,19 @@ public class DBUtil {
                         Field field = clazz.getDeclaredField(fieldName);
                         field.setAccessible(true); // 允许访问 private 属性
 
-                        // 特殊处理：数据库 Timestamp -> Java Date
+                        // 特殊处理 1：数据库 Timestamp -> Java Date
                         if (value instanceof java.sql.Timestamp && field.getType() == java.util.Date.class) {
                             value = new java.util.Date(((java.sql.Timestamp) value).getTime());
+                        }
+                        // 特殊处理 2：数据库 LocalDateTime -> Java Date (针对 MySQL 8.0 新驱动)
+                        else if (value instanceof java.time.LocalDateTime && field.getType() == java.util.Date.class) {
+                            java.time.LocalDateTime localDateTime = (java.time.LocalDateTime) value;
+                            java.time.Instant instant = localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant();
+                            value = java.util.Date.from(instant);
+                        }
+                        // 特殊处理 3：数据库 Boolean -> Java Integer (解决 isActive 报错的核心代码) <--- 重点看这里
+                        else if (value instanceof Boolean && field.getType() == Integer.class) {
+                            value = ((Boolean) value) ? 1 : 0;
                         }
 
                         field.set(obj, value);
@@ -145,6 +157,7 @@ public class DBUtil {
         }
         return list;
     }
+
 
     /**
      * 辅助工具：下划线转驼峰命名

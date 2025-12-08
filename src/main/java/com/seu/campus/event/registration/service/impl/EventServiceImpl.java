@@ -5,6 +5,8 @@ import com.seu.campus.event.registration.mapper.impl.EventMapperImpl;
 import com.seu.campus.event.registration.model.Event;
 import com.seu.campus.event.registration.service.EventService;
 
+import java.util.List;
+
 public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper = new EventMapperImpl();
 
@@ -31,6 +33,11 @@ public class EventServiceImpl implements EventService {
         } else {
             return "发布失败：数据库保存错误";
         }
+    }
+
+    @Override
+    public List<Event> findAllActiveEvents() {
+        return eventMapper.findAllActive();
     }
 }
 

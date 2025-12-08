@@ -1,6 +1,7 @@
 package com.seu.campus.event.registration.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.seu.campus.event.registration.model.Event;
 import com.seu.campus.event.registration.model.User;
 import com.seu.campus.event.registration.service.EventService;
@@ -14,6 +15,7 @@ import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,7 +25,28 @@ import java.util.Map;
 @WebServlet(name = "EventServlet", value = "/event-action")
 public class EventServlet extends HttpServlet {
     private final EventService eventService = new EventServiceImpl();
-    private final Gson gson = new Gson();
+    // 修改 Gson 的初始化，设置日期格式，否则传给前端的是怪异的字符串
+    private final Gson gson = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd HH:mm:ss")
+            .create();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json;charset=utf-8");
+
+        String action = req.getParameter("action");
+
+        switch (action) {
+            case "list":
+                doList(req, resp); // <-- 处理列表请求
+                break;
+            default:
+                writeJson(resp, Map.of("status", "error", "message", "未知的 GET action"));
+                break;
+        }
+    }
+
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -32,11 +55,29 @@ public class EventServlet extends HttpServlet {
 
         String action = req.getParameter("action");
 
-        if ("publish".equals(action)) {
-            doPublish(req, resp);
-        } else {
-            writeJson(resp, Map.of("status", "error", "message", "未知指令"));
+        switch (action) {
+            case "publish":
+                doPublish(req, resp);
+                break;
+            default:
+                writeJson(resp, Map.of("status", "error", "message", "未知指令"));
+                break;
         }
+    }
+
+
+    private void doList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<Event> events = eventService.findAllActiveEvents();
+            result.put("status", "success");
+            result.put("data", events); // 将 List 放进 data 字段
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "查询失败");
+        }
+        writeJson(resp, result);
     }
 
     private void doPublish(HttpServletRequest req, HttpServletResponse resp) throws IOException {
