@@ -1,0 +1,20 @@
+/* src/main/webapp/static/css/common.css */
+
+/* 1. 全局字体设置 */
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* 2. 隐藏滚动条 (美观需求) */
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* 3. 导航栏玻璃拟态效果 (Common Component) */
+/* 所有页面的 header 都有 class="nav-glass" */
+.nav-glass {
+    background-color: rgba(255, 255, 255, 0.85); /* 半透明白 */
+    backdrop-filter: blur(12px);                 /* 毛玻璃模糊 */
+    -webkit-backdrop-filter: blur(12px);         /* Safari 支持 */
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5); /* 淡淡的底边框 */
+}

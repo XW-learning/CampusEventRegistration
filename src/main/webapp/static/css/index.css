@@ -1,0 +1,43 @@
+/* src/main/webapp/static/css/index.css */
+
+/* === 用户登录状态区域样式 === */
+
+/* 登录后的容器 */
+.user-logged-in-box {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 元素间隔 */
+    font-size: 14px;
+}
+
+/* 欢迎文字 */
+.welcome-text {
+    color: #4b5563; /* 对应 Tailwind gray-600 */
+}
+
+/* 用户名高亮 */
+.username-highlight {
+    font-weight: bold;
+    color: #2563eb; /* 对应 Tailwind blue-600 */
+    margin: 0 4px;
+}
+
+/* 退出按钮 */
+.logout-btn {
+    color: #9ca3af; /* 对应 Tailwind gray-400 */
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    font-size: 13px;
+}
+
+.logout-btn:hover {
+    color: #ef4444; /* 对应 Tailwind red-500 */
+}
+
+/* 首页活动卡片的额外样式（可选，以后如果要微调卡片可以写在这里） */
+.event-card-hover:hover {
+    transform: translateY(-4px);
+}

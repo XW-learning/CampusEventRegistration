@@ -1,0 +1,30 @@
+/* src/main/webapp/static/css/publish.css */
+
+/* === Flatpickr 时间选择器自定义样式 === */
+
+/* 隐藏原本的冒号分隔符 */
+.flatpickr-time .flatpickr-time-separator {
+    display: none;
+}
+
+/* 在小时后面加 "时" */
+.flatpickr-hour::after {
+    content: "时";
+    font-size: 12px;
+    color: #666;
+    margin-left: 2px;
+}
+
+/* 在分钟后面加 "分" */
+.flatpickr-minute::after {
+    content: "分";
+    font-size: 12px;
+    color: #666;
+    margin-left: 2px;
+}
+
+/* 强制输入框背景为白色 */
+input.date-picker {
+    background-color: white !important;
+    cursor: pointer;
+}

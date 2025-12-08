@@ -1,0 +1,9 @@
+/* src/main/webapp/static/css/login.css */
+
+/* 登录页背景纹理 */
+.login-bg {
+    background-color: #f3f4f6; /* 对应 Tailwind gray-100 */
+    /* 点状纹理背景 */
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+}

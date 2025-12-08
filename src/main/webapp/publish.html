@@ -4,30 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>发布新活动 - 校园活动平台</title>
-    <link rel="icon" type="image/png" href="static/images/my_icon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="static/js/libs/jquery.min.js"></script>
-
+    <link rel="icon" type="image/png" href="static/images/my_icon.ico">
     <link rel="stylesheet" href="static/css/libs/flatpickr.min.css">
     <link rel="stylesheet" href="static/css/libs/airbnb.css">
+    <link rel="stylesheet" href="static/css/common.css">
+    <link rel="stylesheet" href="static/css/publish.css">
 
-    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/common.css">
 </head>
 <body class="bg-gray-50 font-sans">
 
 <header class="nav-glass fixed w-full top-0 z-50 shadow-sm">
-    <div class="container mx-auto px-6 h-[60px] flex items-center justify-between">
+    <div class="container mx-auto px-6 h-[60px] flex items-center justify-between relative">
+
         <div class="flex items-center space-x-2">
             <a href="index.html" class="flex items-center space-x-2">
-                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">校</div>
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">校
+                </div>
                 <span class="text-xl font-bold text-gray-700 tracking-wide">校园活动平台</span>
             </a>
         </div>
-        <nav class="hidden md:flex space-x-8">
+
+        <nav class="hidden md:flex space-x-8 absolute left-1/2 transform -translate-x-1/2 h-full items-center">
             <a href="index.html" class="text-gray-600 hover:text-blue-500 transition">首页</a>
-            <span class="text-blue-600 font-medium border-b-2 border-blue-600">发布活动</span>
+            <span class="text-blue-600 font-medium border-b-2 border-blue-600 h-full flex items-center px-1">
+                发布活动
+            </span>
         </nav>
-        <div></div>
+
+        <div id="user-area"></div>
     </div>
 </header>
 
@@ -50,7 +57,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">活动分类</label>
-                    <select id="p-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                    <select id="p-category"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
                         <option value="学术讲座">📚 学术讲座</option>
                         <option value="体育竞技">🏀 体育竞技</option>
                         <option value="文艺汇演">🎵 文艺汇演</option>
@@ -60,7 +68,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">活动地点 <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">活动地点 <span
+                            class="text-red-500">*</span></label>
                     <input type="text" id="p-location" placeholder="例如：大活 302 / 操场"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
                 </div>
@@ -69,15 +78,21 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">开始时间</label>
-                    <input type="text" id="p-startTime" class="date-picker w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" placeholder="请选择开始时间">
+                    <input type="text" id="p-startTime"
+                           class="date-picker w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                           placeholder="请选择开始时间">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">结束时间</label>
-                    <input type="text" id="p-endTime" class="date-picker w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" placeholder="请选择结束时间">
+                    <input type="text" id="p-endTime"
+                           class="date-picker w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                           placeholder="请选择结束时间">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1 text-red-600">报名截止</label>
-                    <input type="text" id="p-regDeadline" class="date-picker w-full px-4 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 text-sm" placeholder="请选择截止时间">
+                    <input type="text" id="p-regDeadline"
+                           class="date-picker w-full px-4 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 text-sm"
+                           placeholder="请选择截止时间">
                 </div>
             </div>
 

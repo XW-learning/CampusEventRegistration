@@ -8,6 +8,7 @@ import com.seu.campus.event.registration.service.impl.UserServiceImpl;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -50,6 +51,9 @@ public class UserServlet extends HttpServlet {
             case "logout":
                 doLogout(req, resp);
                 break;
+            case "check_login": // <--- 新增：检查登录状态
+                doCheckLogin(req, resp);
+                break;
             default:
                 // 如果 action 不对，返回错误
                 Map<String, Object> result = new HashMap<>();
@@ -81,10 +85,10 @@ public class UserServlet extends HttpServlet {
         String msg = userService.register(user);
         // 返回结果
         Map<String, Object> result = new HashMap<>();
-        if ("SUCCESS".equals(msg)){
+        if ("SUCCESS".equals(msg)) {
             result.put("status", "success");
             result.put("message", "注册成功");
-        }else {
+        } else {
             result.put("status", "fail");
             result.put("message", msg);
         }
@@ -117,6 +121,31 @@ public class UserServlet extends HttpServlet {
         Map<String, Object> result = new HashMap<>();
         result.put("status", "success");
         result.put("message", "已退出登录");
+        writeJson(resp, result);
+    }
+
+    // 检查登录状态
+    private void doCheckLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        HttpSession session = req.getSession(false); // false 表示如果没 session 也不要新建
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        Map<String, Object> result = new HashMap<>();
+
+        if (currentUser != null) {
+            result.put("status", "success");
+            result.put("message", "已登录");
+            // 为了安全，不要把密码传回前端，重新封装一个简单的 Map
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("userId", currentUser.getUserId());
+            userInfo.put("username", currentUser.getUsername());
+            userInfo.put("realName", currentUser.getRealName());
+            userInfo.put("role", currentUser.getRole());
+
+            result.put("data", userInfo);
+        } else {
+            result.put("status", "fail");
+            result.put("message", "未登录");
+        }
         writeJson(resp, result);
     }
 
