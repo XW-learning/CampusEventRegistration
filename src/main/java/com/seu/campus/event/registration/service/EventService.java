@@ -5,6 +5,9 @@ import com.seu.campus.event.registration.model.Event;
 
 import java.util.List;
 
+/**
+ * @author XW
+ */
 public interface EventService {
     /**
      * 发布活动

@@ -2,14 +2,16 @@
  * static/js/index.js
  * 首页的核心逻辑
  */
-const USER_API_URL = 'user'; // 对应 UserServlet
-const EVENT_API_URL = 'event-action'; // 对应 EventServlet (用于加载活动列表)
+const USER_API_URL = 'user';
+const EVENT_API_URL = 'event-action';
+const REG_API_URL = 'registration-action';
+// 全局变量：记录当前登录用户
+let currentUser = null;
 
 $(document).ready(function () {
     // 1. 检查登录状态
     checkLoginStatus();
-
-    // 2. 加载活动列表 (这是你上一个功能做的，保留在这里)
+    // 2. 加载活动列表
     loadEventList();
 });
 
@@ -24,15 +26,11 @@ function checkLoginStatus() {
         dataType: 'json',
         success: function (res) {
             if (res.status === 'success' && res.data) {
-                // 已登录：显示欢迎信息和退出按钮
+                currentUser = res.data; // ★ 核心：保存用户信息到全局变量
                 updateHeaderLoggedIn(res.data);
-            } else {
-                // 未登录：保持默认显示 (登录/注册按钮)
-                // 也可以显式调用 updateHeaderGuest() 确保状态正确
+                // 自动预填弹窗里的姓名 (优化体验)
+                $('#reg-name').val(currentUser.realName || currentUser.username);
             }
-        },
-        error: function (xhr) {
-            console.log("检查登录状态失败，视为未登录");
         }
     });
 }
@@ -127,7 +125,7 @@ function renderEvents(events) {
         return;
     }
 
-    events.forEach(function(event) {
+    events.forEach(function (event) {
         // 1. 格式化三个时间字段 (截取前16位: "yyyy-MM-dd HH:mm")
         const startStr = event.startTime ? event.startTime.substring(0, 16) : '待定';
         const endStr = event.endTime ? event.endTime.substring(0, 16) : '待定';
@@ -169,13 +167,73 @@ function renderEvents(events) {
                             <span class="font-medium mr-1">活动地点：</span> ${event.location}
                         </p>
                     </div>
-                    <button onclick="alert('报名功能开发中... 活动ID: ${event.eventId}')" 
-                        class="w-full mt-4 bg-gray-50 text-blue-600 py-2 rounded-lg font-medium hover:bg-blue-600 hover:text-white transition-all duration-200 border border-blue-100 hover:border-blue-600 hover:shadow-md">
+                    <button onclick="openRegModal(${event.eventId})" class="w-full mt-4 bg-gray-50 text-blue-600 py-2 rounded-lg font-medium hover:bg-blue-600 hover:text-white transition-all duration-200 border border-blue-100 hover:border-blue-600 hover:shadow-md">
                         立即报名
                     </button>
                 </div>
             </div>
         `;
         container.append(html);
+    });
+}
+
+function openRegModal(eventId) {
+    // A. 检查是否登录
+    if (!currentUser) {
+        if (confirm("您需要登录后才能报名活动。\n是否立即跳转到登录页面？")) {
+            window.location.href = 'login.html';
+        }
+        return;
+    }
+
+    // B. 显示弹窗
+    $('#reg-eventId').val(eventId); // 把活动ID存入隐藏域
+    $('#reg-modal').removeClass('hidden'); // 显示 Modal
+
+    // 给弹窗主体加个小动画 (如果你加了 css 的话)
+    $('#reg-modal > div:last-child').addClass('fade-in');
+}
+
+// --- 3. 关闭弹窗 ---
+function closeRegModal() {
+    $('#reg-modal').addClass('hidden');
+}
+
+// --- 4. 提交报名 ---
+function submitRegistration() {
+    const eventId = $('#reg-eventId').val();
+    const name = $('#reg-name').val().trim();
+    const phone = $('#reg-phone').val().trim();
+
+    // 简单校验
+    if (!name || !phone) {
+        alert("请务必填写真实姓名和联系电话，以便通知！");
+        return;
+    }
+
+    // 发送请求
+    $.ajax({
+        url: REG_API_URL,
+        type: 'POST',
+        data: {
+            action: 'register',
+            eventId: eventId,
+            contactName: name,   // 传给后端
+            contactPhone: phone  // 传给后端
+        },
+        dataType: 'json',
+        success: function (res) {
+            if (res.status === 'success') {
+                closeRegModal();
+                alert("🎉 " + res.message);
+                // 可选：刷新列表或更改按钮状态
+            } else {
+                alert("❌ 报名失败：" + res.message);
+                if (res.code === 'NOT_LOGIN') window.location.href = 'login.html';
+            }
+        },
+        error: function () {
+            alert("服务器网络错误，请稍后重试。");
+        }
     });
 }

@@ -7,6 +7,15 @@ import com.seu.campus.event.registration.service.EventService;
 
 import java.util.List;
 
+/**
+ * 活动服务实现类
+ * 主要负责处理活动相关的业务逻辑，包括：
+ * 1. 发布新活动（包含数据校验和保存）
+ * 2. 查询所有有效的活动列表
+ *
+ * @author XW
+ */
+
 public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper = new EventMapperImpl();
 

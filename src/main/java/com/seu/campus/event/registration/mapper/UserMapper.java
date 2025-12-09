@@ -5,6 +5,8 @@ import com.seu.campus.event.registration.model.User;
 /**
  * 用户数据访问层接口
  * 职能：定义针对 t_user 表的操作规范
+ *
+ * @author XW
  */
 public interface UserMapper {
 

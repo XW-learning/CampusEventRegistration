@@ -7,6 +7,8 @@ import java.util.List;
 /**
  * 活动数据访问层接口
  * 职能：定义针对 t_event 表的操作规范
+ *
+ * @author XW
  */
 public interface EventMapper {
     /**
@@ -23,4 +25,12 @@ public interface EventMapper {
      * @return 活动列表
      */
     List<Event> findAllActive();
+
+    /**
+     * 根据活动 ID 查询活动（用于报名时检查时间和状态）
+     *
+     * @param eventId 活动 ID
+     * @return 活动对象
+     */
+    Event findById(Integer eventId);
 }

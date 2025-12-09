@@ -13,7 +13,11 @@ public class DBUtil {
 
     // ================= 配置区域 (请修改这里) =================
     // 1. 数据库连接 URL (MySQL 8.0 标准写法，包含时区和编码设置)
-    private static final String URL = "jdbc:mysql://localhost:3306/db_campus_event?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false";
+    private static final String DB_NAME = "db_campus_event";
+    private static final String URL = "jdbc:mysql://localhost:3306/"
+            + DB_NAME +
+            "?allowPublicKeyRetrieval=true&useSSL=false";
+
     // 2. 数据库用户名
     private static final String USER = "root";
     // 3. 数据库密码 (TODO: 请替换为你自己的密码)
@@ -124,15 +128,14 @@ public class DBUtil {
                     // 4. 将值注入到对象的属性中
                     try {
                         Field field = clazz.getDeclaredField(fieldName);
-                        field.setAccessible(true); // 允许访问 private 属性
+                        field.setAccessible(true);
 
                         // 特殊处理 1：数据库 Timestamp -> Java Date
                         if (value instanceof java.sql.Timestamp && field.getType() == java.util.Date.class) {
                             value = new java.util.Date(((java.sql.Timestamp) value).getTime());
                         }
                         // 特殊处理 2：数据库 LocalDateTime -> Java Date (针对 MySQL 8.0 新驱动)
-                        else if (value instanceof java.time.LocalDateTime && field.getType() == java.util.Date.class) {
-                            java.time.LocalDateTime localDateTime = (java.time.LocalDateTime) value;
+                        else if (value instanceof java.time.LocalDateTime localDateTime && field.getType() == java.util.Date.class) {
                             java.time.Instant instant = localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant();
                             value = java.util.Date.from(instant);
                         }
@@ -190,9 +193,15 @@ public class DBUtil {
      */
     public static void close(ResultSet rs, Statement stmt, Connection conn) {
         try {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-            if (conn != null) conn.close();
+            if (rs != null) {
+                rs.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

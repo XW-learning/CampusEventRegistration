@@ -41,3 +41,14 @@
 .event-card-hover:hover {
     transform: translateY(-4px);
 }
+
+/* static/css/index.css */
+/* 简单的淡入淡出动画类 */
+.fade-in {
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -48%) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

@@ -10,6 +10,7 @@ import com.seu.campus.event.registration.service.impl.EventServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
@@ -26,9 +27,7 @@ import java.util.Map;
 public class EventServlet extends HttpServlet {
     private final EventService eventService = new EventServiceImpl();
     // 修改 Gson 的初始化，设置日期格式，否则传给前端的是怪异的字符串
-    private final Gson gson = new GsonBuilder()
-            .setDateFormat("yyyy-MM-dd HH:mm:ss")
-            .create();
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -39,7 +38,7 @@ public class EventServlet extends HttpServlet {
 
         switch (action) {
             case "list":
-                doList(req, resp); // <-- 处理列表请求
+                doList(req, resp);
                 break;
             default:
                 writeJson(resp, Map.of("status", "error", "message", "未知的 GET action"));
@@ -116,9 +115,15 @@ public class EventServlet extends HttpServlet {
             String endStr = req.getParameter("endTime");
             String deadlineStr = req.getParameter("regDeadline");
 
-            if(startStr != null && !startStr.isEmpty()) event.setStartTime(sdf.parse(startStr));
-            if(endStr != null && !endStr.isEmpty()) event.setEndTime(sdf.parse(endStr));
-            if(deadlineStr != null && !deadlineStr.isEmpty()) event.setRegDeadline(sdf.parse(deadlineStr));
+            if (startStr != null && !startStr.isEmpty()) {
+                event.setStartTime(sdf.parse(startStr));
+            }
+            if (endStr != null && !endStr.isEmpty()) {
+                event.setEndTime(sdf.parse(endStr));
+            }
+            if (deadlineStr != null && !deadlineStr.isEmpty()) {
+                event.setRegDeadline(sdf.parse(deadlineStr));
+            }
 
             // 4. 调用业务层
             String msg = eventService.publishEvent(event);

@@ -5,8 +5,17 @@ import com.seu.campus.event.registration.mapper.impl.UserMapperImpl;
 import com.seu.campus.event.registration.model.User;
 import com.seu.campus.event.registration.service.UserService;
 
+/**
+ * 用户模块服务实现类
+ * 主要负责处理用户相关的业务逻辑，包括：
+ * 1. 用户注册（包含用户名唯一性校验、密码验证、默认角色设置等）
+ * 2. 用户登录验证
+ *
+ * @author XW
+ */
+
 public class UserServiceImpl implements UserService {
-    private UserMapper userMapper = new UserMapperImpl();
+    private final UserMapper userMapper = new UserMapperImpl();
 
     @Override
     public String register(User user) {
@@ -24,7 +33,7 @@ public class UserServiceImpl implements UserService {
         }
         // 3. 这里的默认角色设置 (防止前端没传)
         if (user.getRole() == null || "".equals(user.getRole())) {
-            user.setRole("student"); // 默认为学生
+            user.setRole("student");
         }
         // 4. 执行保存
         int rows = userMapper.save(user);

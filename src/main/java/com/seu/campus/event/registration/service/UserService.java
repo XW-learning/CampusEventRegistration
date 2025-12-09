@@ -5,6 +5,7 @@ import com.seu.campus.event.registration.model.User;
 /**
  * 用户业务逻辑层接口
  * 职能：处理登录、注册等具体业务规则
+ * @author XW
  */
 public interface UserService {
 

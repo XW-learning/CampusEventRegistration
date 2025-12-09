@@ -18,6 +18,8 @@ import java.util.Map;
  * 用户模块控制器
  * 处理路径: /user
  * 请求参数: action (register/login)
+ *
+ * @author XW
  */
 @WebServlet(name = "user", value = "/user")
 public class UserServlet extends HttpServlet {
@@ -27,14 +29,14 @@ public class UserServlet extends HttpServlet {
     private final Gson gson = new Gson();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // 1. 设置请求和响应编码 (防止中文乱码)
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=utf-8");
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // 1. 设置请求和响应编码 (防止中文乱码)
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=utf-8");
@@ -51,7 +53,7 @@ public class UserServlet extends HttpServlet {
             case "logout":
                 doLogout(req, resp);
                 break;
-            case "check_login": // <--- 新增：检查登录状态
+            case "check_login":
                 doCheckLogin(req, resp);
                 break;
             default:
@@ -106,7 +108,7 @@ public class UserServlet extends HttpServlet {
             session.setAttribute("currentUser", user);
             result.put("status", "success");
             result.put("message", "登录成功");
-            result.put("data", user); // 可以把用户信息返给前端展示
+            result.put("data", user);
         } else {
             result.put("status", "fail");
             result.put("message", "用户名或密码错误");
@@ -126,7 +128,7 @@ public class UserServlet extends HttpServlet {
 
     // 检查登录状态
     private void doCheckLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        HttpSession session = req.getSession(false); // false 表示如果没 session 也不要新建
+        HttpSession session = req.getSession(false);
         User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
 
         Map<String, Object> result = new HashMap<>();

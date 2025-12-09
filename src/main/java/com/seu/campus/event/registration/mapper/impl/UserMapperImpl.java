@@ -6,6 +6,9 @@ import com.seu.campus.event.registration.util.DBUtil;
 
 import java.util.List;
 
+/**
+ * @author XW
+ */
 public class UserMapperImpl implements UserMapper {
     @Override
     public int save(User user) {

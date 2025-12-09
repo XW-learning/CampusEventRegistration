@@ -5,18 +5,20 @@ import java.util.Date;
 /**
  * 活动实体类
  * 对应数据库表: t_event
+ *
+ * @author XW
  */
 public class Event {
-    private Integer eventId;      // event_id
-    private String title;         // title
-    private String category;      // category
-    private String location;      // location
-    private Date startTime;       // start_time
-    private Date endTime;         // end_time
-    private Date regDeadline;     // reg_deadline
-    private String detail;        // detail
-    private Integer publisherId;  // publisher_id
-    private Integer isActive;     // is_active (1:有效, 0:无效)
+    private Integer eventId;
+    private String title;
+    private String category;
+    private String location;
+    private Date startTime;
+    private Date endTime;
+    private Date regDeadline;
+    private String detail;
+    private Integer publisherId;
+    private Integer isActive;
 
     // 无参构造
     public Event() {

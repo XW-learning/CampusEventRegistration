@@ -5,17 +5,32 @@ import java.util.Date;
 /**
  * 报名信息实体类
  * 对应数据库表: t_registration
+ *
+ * @author XW
  */
 public class Registration {
-    private Integer regId;        // reg_id
-    private Integer eventId;      // event_id
-    private Integer userId;       // user_id
-    private Date regTime;         // reg_time
-    private String status;        // status (pending/approved/rejected)
-    private Integer isSignedIn;   // is_signed_in (1:是, 0:否)
+    private Integer regId;
+    private Integer eventId;
+    private Integer userId;
+    private Date regTime;
+    private String status;
+    private Integer isSignedIn;
+    private String contactName;
+    private String contactPhone;
 
     // 无参构造
     public Registration() {
+    }
+
+    public Registration(Integer regId, Integer eventId, Integer userId, Date regTime, String status, Integer isSignedIn, String contactName, String contactPhone) {
+        this.regId = regId;
+        this.eventId = eventId;
+        this.userId = userId;
+        this.regTime = regTime;
+        this.status = status;
+        this.isSignedIn = isSignedIn;
+        this.contactName = contactName;
+        this.contactPhone = contactPhone;
     }
 
     // Getter / Setter
@@ -65,5 +80,21 @@ public class Registration {
 
     public void setIsSignedIn(Integer isSignedIn) {
         this.isSignedIn = isSignedIn;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 }

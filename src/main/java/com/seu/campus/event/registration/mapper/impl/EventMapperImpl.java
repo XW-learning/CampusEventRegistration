@@ -6,6 +6,9 @@ import com.seu.campus.event.registration.util.DBUtil;
 
 import java.util.List;
 
+/**
+ * @author XW
+ */
 public class EventMapperImpl implements EventMapper {
     @Override
     public int save(Event event) {
@@ -28,5 +31,12 @@ public class EventMapperImpl implements EventMapper {
     public List<Event> findAllActive() {
         String sql = "SELECT * FROM t_event WHERE is_active = 1 ORDER BY start_time DESC";
         return DBUtil.query(sql, Event.class);
+    }
+
+    @Override
+    public Event findById(Integer eventId) {
+        String sql = "SELECT * FROM t_event WHERE event_id = ?";
+        List<Event> list = DBUtil.query(sql, Event.class, eventId);
+        return list.isEmpty() ? null : list.get(0);
     }
 }
