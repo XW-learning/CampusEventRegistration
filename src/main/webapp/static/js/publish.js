@@ -2,7 +2,7 @@
  * static/js/publish.js
  * 活动发布页面的逻辑
  */
-const PUBLISH_API_URL = '/event/event-action';
+const PUBLISH_API_URL = 'event-action';
 
 // 1. 页面加载完成后，初始化 Flatpickr
 $(document).ready(function() {

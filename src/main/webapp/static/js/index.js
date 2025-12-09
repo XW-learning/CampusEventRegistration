@@ -37,25 +37,39 @@ function checkLoginStatus() {
 
 /**
  * 更新头部 UI - 已登录状态
- * @param {Object} user 用户信息
+ * @param {Object} user 用户信息 (包含 role 字段)
  */
 function updateHeaderLoggedIn(user) {
     const userArea = $('#user-area');
     const displayName = user.realName || user.username;
 
-    // 使用我们刚刚在 index.css 中定义的 class
-    const html = `
-        <div class="flex items-center">
+    // 🟢 关键修改：根据角色判断是否生成“发布活动”按钮
+    // 只有当 user.role 是 'organizer' 时，才生成这个按钮的 HTML
+    let publishBtnHtml = '';
+
+    // 注意：这里要跟数据库里存的字符串完全一致 (比如 'organizer')
+    if (user.role === 'organizer') {
+        publishBtnHtml = `
             <a href="publish.html" class="hidden md:inline-block px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold rounded-full transition shadow-md mr-6">
                 + 发布活动
             </a>
+        `;
+    }
+
+    // 拼接最终 HTML
+    const html = `
+        <div class="flex items-center">
+            ${publishBtnHtml}
             
             <div class="user-logged-in-box">
                 <span class="welcome-text">
                     欢迎您，<span class="username-highlight">${displayName}</span>
+                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded ml-1">
+                        ${user.role === 'organizer' ? '组织者' : '学生'}
+                    </span>
                 </span>
-                <button onclick="doLogout()" class="logout-btn">
-                    退出系统
+                <button onclick="doLogout()" class="logout-btn ml-2">
+                    退出
                 </button>
             </div>
         </div>

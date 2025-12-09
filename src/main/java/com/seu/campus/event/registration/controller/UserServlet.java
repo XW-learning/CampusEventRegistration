@@ -45,15 +45,19 @@ public class UserServlet extends HttpServlet {
         // 路由分发
         switch (action) {
             case "register":
+                // 处理注册
                 doRegister(req, resp);
                 break;
             case "login":
+                // 处理登录
                 doLogin(req, resp);
                 break;
             case "logout":
+                // 处理登出
                 doLogout(req, resp);
                 break;
             case "check_login":
+                // 处理检查登录状态
                 doCheckLogin(req, resp);
                 break;
             default:
@@ -103,6 +107,7 @@ public class UserServlet extends HttpServlet {
         String password = req.getParameter("password");
         User user = userService.login(username, password);
         Map<String, Object> result = new HashMap<>();
+        System.out.println( user);
         if (user != null) {
             HttpSession session = req.getSession();
             session.setAttribute("currentUser", user);

@@ -1,5 +1,5 @@
 // src/main/webapp/static/js/login.js
-const LOGIN_API_URL = '/event/user'
+const LOGIN_API_URL = 'user'
 /**
  * 切换视图模式
  * @param mode 'login' | 'register'

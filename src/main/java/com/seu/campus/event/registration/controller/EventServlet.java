@@ -22,6 +22,8 @@ import java.util.Map;
 /**
  * 活动模块控制器
  * 处理路径: /event-action
+ *
+ * @author XW
  */
 @WebServlet(name = "EventServlet", value = "/event-action")
 public class EventServlet extends HttpServlet {
@@ -91,7 +93,13 @@ public class EventServlet extends HttpServlet {
             writeJson(resp, result);
             return;
         }
-
+        // 角色检查
+        if (!"organizer".equals(currentUser.getRole())) {
+            result.put("status", "fail");
+            result.put("message", "权限不足：只有活动组织者才能发布活动！");
+            writeJson(resp, result);
+            return;
+        }
         try {
             // 2. 获取参数
             String title = req.getParameter("title");
