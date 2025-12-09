@@ -32,4 +32,15 @@ public class UserMapperImpl implements UserMapper {
         }
         return null;
     }
+
+    @Override
+    public int update(User user) {
+        String sql = "UPDATE t_user SET real_name = ?, phone = ?, email = ? WHERE user_id = ?";
+        return DBUtil.update(sql,
+                user.getRealName(),
+                user.getPhone(),
+                user.getEmail(),
+                user.getUserId()
+        );
+    }
 }

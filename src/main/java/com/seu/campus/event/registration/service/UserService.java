@@ -26,4 +26,12 @@ public interface UserService {
      */
     User login(String username, String password);
 
+    /**
+     * 更新用户信息业务
+     *
+     * @param user 用户对象
+     * @return 更新结果消息 (例如："SUCCESS" 登录成功，其他字符串表示具体的错误原因)
+     */
+    String updateProfile(User user);
+
 }

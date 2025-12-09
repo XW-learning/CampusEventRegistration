@@ -48,5 +48,15 @@ public class EventServiceImpl implements EventService {
     public List<Event> findAllActiveEvents() {
         return eventMapper.findAllActive();
     }
+
+    @Override
+    public List<Event> findMyEvents(Integer userId, String type) {
+        if ("published".equals(type)) {
+            return eventMapper.findByPublisherId(userId);
+        } else if ("joined".equals(type)) {
+            return eventMapper.findRegisteredByUserId(userId);
+        }
+        return List.of();
+    }
 }
 

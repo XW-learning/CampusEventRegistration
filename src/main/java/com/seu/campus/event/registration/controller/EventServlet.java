@@ -42,6 +42,9 @@ public class EventServlet extends HttpServlet {
             case "list":
                 doList(req, resp);
                 break;
+            case "my_events":
+                doMyEvents(req, resp);
+                break;
             default:
                 writeJson(resp, Map.of("status", "error", "message", "未知的 GET action"));
                 break;
@@ -72,7 +75,35 @@ public class EventServlet extends HttpServlet {
         try {
             List<Event> events = eventService.findAllActiveEvents();
             result.put("status", "success");
-            result.put("data", events); // 将 List 放进 data 字段
+            result.put("data", events);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "查询失败");
+        }
+        writeJson(resp, result);
+    }
+
+    private void doMyEvents(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        HttpSession session = req.getSession(false);
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        if (currentUser == null) {
+            result.put("status", "fail");
+            result.put("message", "未登录");
+            writeJson(resp, result);
+            return;
+        }
+
+        // 获取类型：published (我发布的) 或 joined (我报名的)
+        String type = req.getParameter("type");
+
+        try {
+            List<Event> events = eventService.findMyEvents(currentUser.getUserId(), type);
+            result.put("status", "success");
+            result.put("data", events);
         } catch (Exception e) {
             e.printStackTrace();
             result.put("status", "error");

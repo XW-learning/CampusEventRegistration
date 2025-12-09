@@ -60,6 +60,10 @@ public class UserServlet extends HttpServlet {
                 // 处理检查登录状态
                 doCheckLogin(req, resp);
                 break;
+            case "update_profile":
+                // 处理更新用户信息
+                doUpdateProfile(req, resp);
+                break;
             default:
                 // 如果 action 不对，返回错误
                 Map<String, Object> result = new HashMap<>();
@@ -107,7 +111,6 @@ public class UserServlet extends HttpServlet {
         String password = req.getParameter("password");
         User user = userService.login(username, password);
         Map<String, Object> result = new HashMap<>();
-        System.out.println( user);
         if (user != null) {
             HttpSession session = req.getSession();
             session.setAttribute("currentUser", user);
@@ -147,11 +150,53 @@ public class UserServlet extends HttpServlet {
             userInfo.put("username", currentUser.getUsername());
             userInfo.put("realName", currentUser.getRealName());
             userInfo.put("role", currentUser.getRole());
+            userInfo.put("phone", currentUser.getPhone());
+            userInfo.put("email", currentUser.getEmail());
 
             result.put("data", userInfo);
         } else {
             result.put("status", "fail");
             result.put("message", "未登录");
+        }
+        writeJson(resp, result);
+    }
+
+    private void doUpdateProfile(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        // 1. 获取当前登录用户 (为了安全，ID必须从Session取，不能信前端传的)
+        HttpSession session = req.getSession(false);
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        if (currentUser == null) {
+            result.put("status", "fail");
+            result.put("message", "未登录");
+            writeJson(resp, result);
+            return;
+        }
+
+        // 2. 获取参数
+        String realName = req.getParameter("realName");
+        String phone = req.getParameter("phone");
+        String email = req.getParameter("email");
+
+        // 3. 更新内存中的 currentUser 对象 (用于传给 Service)
+        currentUser.setRealName(realName);
+        currentUser.setPhone(phone);
+        currentUser.setEmail(email);
+
+        // 4. 调用业务层
+        String msg = userService.updateProfile(currentUser);
+
+        if ("SUCCESS".equals(msg)) {
+            // 🟢 关键：数据库更新成功后，也要更新 Session 里的对象，否则刷新页面还是旧数据
+            session.setAttribute("currentUser", currentUser);
+
+            result.put("status", "success");
+            result.put("message", "个人信息修改成功！");
+        } else {
+            result.put("status", "fail");
+            result.put("message", msg);
         }
         writeJson(resp, result);
     }

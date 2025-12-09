@@ -19,7 +19,17 @@ public interface EventService {
 
     /**
      * 查询所有有效活动
+     *
      * @return 活动列表
      */
     List<Event> findAllActiveEvents(); // <-- 新增
+
+    /**
+     * 获取我的相关活动
+     *
+     * @param userId 用户 ID
+     * @param type   查询类型："registered" 查询已报名的活动，"created" 查询已创建的活动
+     * @return 活动列表
+     */
+    List<Event> findMyEvents(Integer userId, String type);
 }

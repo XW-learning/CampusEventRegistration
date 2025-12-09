@@ -53,4 +53,13 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+
+    @Override
+    public String updateProfile(User user) {
+        if (user.getUserId() == null) {
+            return "用户ID不能为空";
+        }
+        int rows = userMapper.update(user);
+        return rows > 0 ? "SUCCESS" : "更新失败：数据库操作无响应";
+    }
 }

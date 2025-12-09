@@ -3,22 +3,22 @@
  * 个人中心页面的逻辑
  */
 const USER_API_URL = 'user';
+const EVENT_API_URL = 'event-action';
+// 全局变量存储当前用户
+let currentUser = null;
 
-$(document).ready(function() {
+$(document).ready(function () {
     // 1. 检查登录并初始化页面
     checkLoginAndInit();
 });
-
-// 全局变量存储当前用户
-let currentUser = null;
 
 function checkLoginAndInit() {
     $.ajax({
         url: USER_API_URL,
         type: 'POST',
-        data: { action: 'check_login' },
+        data: {action: 'check_login'},
         dataType: 'json',
-        success: function(res) {
+        success: function (res) {
             if (res.status === 'success' && res.data) {
                 currentUser = res.data;
 
@@ -91,53 +91,121 @@ function switchTab(type) {
 
 // 保存修改 (前端逻辑准备好了，等待后端 update_profile 接口)
 function updateProfile() {
-    const realName = $('#p-realName').val();
-    const phone = $('#p-phone').val();
-    const email = $('#p-email').val();
+    const realName = $('#p-realName').val().trim();
+    const phone = $('#p-phone').val().trim();
+    const email = $('#p-email').val().trim();
 
-    // 简单校验
-    if(!realName) { alert("真实姓名不能为空"); return; }
+    if (!realName) {
+        alert("真实姓名不能为空");
+        return;
+    }
 
-    // 模拟提交
-    alert("正在保存修改...\n(后端接口暂未实现，数据仅前端展示)");
-    // TODO: 下一步实现 UserServlet 的 update action
+    $.ajax({
+        url: USER_API_URL,
+        type: 'POST',
+        data: {
+            action: 'update_profile',
+            realName: realName,
+            phone: phone,
+            email: email
+        },
+        dataType: 'json',
+        success: function (res) {
+            if (res.status === 'success') {
+                alert("✅ " + res.message);
+                // 更新页面上的显示名字
+                $('#display-name').text(realName);
+                // 更新头像字
+                $('#avatar-text').text(realName.charAt(0).toUpperCase());
+            } else {
+                alert("❌ " + res.message);
+            }
+        }
+    });
 }
 
-// 加载我报名的活动 (占位)
+// 2. 加载列表通用函数
+function loadEvents(type, containerId) {
+    const container = $('#' + containerId);
+    container.html('<p class="text-center text-gray-500 py-10">正在加载数据...</p>');
+
+    $.ajax({
+        url: EVENT_API_URL,
+        type: 'GET',
+        data: {
+            action: 'my_events',
+            type: type
+        },
+        dataType: 'json',
+        success: function (res) {
+            if (res.status === 'success' && res.data && res.data.length > 0) {
+                renderEventList(res.data, container, type);
+            } else {
+                container.html('<div class="text-center py-10 text-gray-400 bg-white rounded-lg border border-dashed border-gray-200">暂无相关活动记录</div>');
+            }
+        },
+        error: function () {
+            container.html('<p class="text-center text-red-500 py-10">加载失败，请刷新重试</p>');
+        }
+    });
+}
+
+// 3. 渲染列表 HTML
+function renderEventList(events, container, type) {
+    let html = '';
+    events.forEach(event => {
+        // 简单的状态判断 (根据时间)
+        const now = new Date().getTime();
+        const end = new Date(event.endTime).getTime();
+        const isFinished = now > end;
+        const statusBadge = isFinished
+            ? '<span class="text-gray-400 bg-gray-100 px-2 py-1 rounded text-xs">已结束</span>'
+            : '<span class="text-green-600 bg-green-50 px-2 py-1 rounded text-xs">进行中</span>';
+
+        // 针对组织者的操作按钮 (查看报名名单)
+        let actionBtns = '';
+        if (type === 'published') {
+            // 注意：这里留了一个 onclick 接口，后面我们会实现查看名单的功能
+            actionBtns = `
+                <button onclick="viewRegistrations(${event.eventId})" class="text-blue-600 hover:text-blue-800 text-sm font-medium border border-blue-200 hover:border-blue-600 px-3 py-1 rounded transition-colors">
+                    📋 查看报名名单
+                </button>
+            `;
+        } else {
+            // 针对报名者的按钮
+            actionBtns = `<span class="text-gray-400 text-sm">已报名</span>`;
+        }
+
+        html += `
+            <div class="event-item-row group hover:border-blue-200 transition-colors">
+                <div class="w-32 h-24 bg-gray-100 rounded-lg flex-shrink-0 mr-4 overflow-hidden relative">
+                    <img src="https://picsum.photos/seed/${event.eventId}/200/150" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-grow min-w-0"> <h4 class="font-bold text-gray-800 text-lg truncate group-hover:text-blue-600 transition-colors">${event.title}</h4>
+                    <div class="text-sm text-gray-500 mt-2 space-y-1">
+                        <p>📅 ${event.startTime ? event.startTime.substring(0, 16) : '待定'}</p>
+                        <p>📍 ${event.location}</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end justify-between ml-4 py-1 h-24">
+                    ${statusBadge}
+                    ${actionBtns}
+                </div>
+            </div>
+        `;
+    });
+    container.html(html);
+}
+
 function loadJoinedEvents() {
-    const container = $('#content-joined');
-    // 暂时用静态 HTML 演示效果
-    container.html(`
-        <div class="event-item-row">
-            <div class="w-32 h-24 bg-gray-200 rounded flex-shrink-0 mr-4 flex items-center justify-center text-gray-400 text-xs">活动封面</div>
-            <div class="flex-grow">
-                <h4 class="font-bold text-gray-800 text-lg">示例：Java 编程大赛</h4>
-                <p class="text-sm text-gray-500 mt-1">📅 2025-10-24 14:00</p>
-                <p class="text-sm text-gray-500">📍 计算机学院报告厅</p>
-            </div>
-            <div class="flex flex-col items-end justify-center ml-4">
-                <span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded mb-2">已报名</span>
-                <button class="text-gray-400 text-sm hover:text-red-500 underline">取消报名</button>
-            </div>
-        </div>
-    `);
+    loadEvents('joined', 'content-joined');
 }
 
-// 加载我发布的活动 (占位)
 function loadPublishedEvents() {
-    const container = $('#content-published');
-    container.html(`
-        <div class="event-item-row">
-            <div class="w-32 h-24 bg-blue-50 rounded flex-shrink-0 mr-4 flex items-center justify-center text-blue-300 text-xs">活动封面</div>
-            <div class="flex-grow">
-                <h4 class="font-bold text-gray-800 text-lg">示例：组织者发布的测试活动</h4>
-                <p class="text-sm text-gray-500 mt-1">报名人数：<span class="text-blue-600 font-bold">12</span> / 50</p>
-                <p class="text-sm text-gray-500">状态：<span class="text-green-600">进行中</span></p>
-            </div>
-            <div class="flex flex-col items-end justify-center ml-4 space-y-2">
-                <button class="bg-blue-50 text-blue-600 text-xs px-3 py-1.5 rounded hover:bg-blue-100">管理名单</button>
-                <button class="text-gray-400 text-xs hover:text-red-500">删除</button>
-            </div>
-        </div>
-    `);
+    loadEvents('published', 'content-published');
+}
+
+// 5. 预留：查看报名名单功能 (给下一个功能模块用)
+function viewRegistrations(eventId) {
+    alert("正在开发中... 即将跳转到活动 [" + eventId + "] 的报名名单页");
 }

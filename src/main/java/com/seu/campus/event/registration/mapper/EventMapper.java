@@ -33,4 +33,20 @@ public interface EventMapper {
      * @return 活动对象
      */
     Event findById(Integer eventId);
+
+    /**
+     * 根据发布者 ID 查询该发布者发布的活动
+     *
+     * @param publisherId 发布者 ID
+     * @return 活动列表
+     */
+    List<Event> findByPublisherId(Integer publisherId);
+
+    /**
+     * 根据用户 ID 查询该用户报名的活动
+     *
+     * @param userId 用户 ID
+     * @return 活动列表
+     */
+    List<Event> findRegisteredByUserId(Integer userId);
 }

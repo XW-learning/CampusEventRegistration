@@ -39,4 +39,19 @@ public class EventMapperImpl implements EventMapper {
         List<Event> list = DBUtil.query(sql, Event.class, eventId);
         return list.isEmpty() ? null : list.get(0);
     }
+
+    @Override
+    public List<Event> findByPublisherId(Integer publisherId) {
+        String sql = "SELECT * FROM t_event WHERE publisher_id = ? ORDER BY start_time DESC";
+        return DBUtil.query(sql, Event.class, publisherId);
+    }
+
+    @Override
+    public List<Event> findRegisteredByUserId(Integer userId) {
+        String sql = "SELECT e.* FROM t_event e " +
+                "JOIN t_registration r ON e.event_id = r.event_id " +
+                "WHERE r.user_id = ? " +
+                "ORDER BY r.reg_time DESC";
+        return DBUtil.query(sql, Event.class, userId);
+    }
 }

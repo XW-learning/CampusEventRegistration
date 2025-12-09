@@ -25,4 +25,13 @@ public interface UserMapper {
      * @return 用户对象
      */
     User findByUsername(String username);
+
+    /**
+     * 更新用户信息
+     *
+     * @param user 用户对象
+     * @return 影响行数
+     */
+    int update(User user);
+
 }
