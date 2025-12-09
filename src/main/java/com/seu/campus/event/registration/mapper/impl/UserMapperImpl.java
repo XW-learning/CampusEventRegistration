@@ -25,9 +25,9 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public User findByUsername(String username) {
-        String sql = "SELECT * FROM t_user WHERE username = ?";
+        String sql = "SELECT * FROM t_user WHERE username = ? LIMIT 1";
         List<User> list = DBUtil.query(sql, User.class, username);
-        if (list != null && list.size() > 0) {
+        if (!list.isEmpty()) {
             return list.get(0);
         }
         return null;
