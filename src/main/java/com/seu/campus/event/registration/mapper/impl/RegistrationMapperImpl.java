@@ -36,4 +36,10 @@ public class RegistrationMapperImpl implements RegistrationMapper {
         // 如果 List 为空说明没查到，返回 null；否则返回第一条
         return list.isEmpty() ? null : list.get(0);
     }
+
+    @Override
+    public List<Registration> findByEventId(Integer eventId) {
+        String sql = "SELECT * FROM t_registration WHERE event_id = ? ORDER BY reg_time DESC";
+        return DBUtil.query(sql, Registration.class, eventId);
+    }
 }

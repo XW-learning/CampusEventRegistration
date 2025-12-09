@@ -2,6 +2,8 @@ package com.seu.campus.event.registration.mapper;
 
 import com.seu.campus.event.registration.model.Registration;
 
+import java.util.List;
+
 /**
  * @author XW
  */
@@ -22,4 +24,12 @@ public interface RegistrationMapper {
      * @return 报名信息
      */
     Registration findByEventIdAndUserId(Integer eventId, Integer userId);
+
+    /**
+     * 根据活动 ID 查询该活动下的所有报名信息
+     *
+     * @param eventId 活动 ID
+     * @return 报名信息列表
+     */
+    List<Registration> findByEventId(Integer eventId);
 }

@@ -49,4 +49,5 @@ public interface EventMapper {
      * @return 活动列表
      */
     List<Event> findRegisteredByUserId(Integer userId);
+
 }

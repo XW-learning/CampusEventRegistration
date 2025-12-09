@@ -4,6 +4,7 @@
  */
 const USER_API_URL = 'user';
 const EVENT_API_URL = 'event-action';
+const REG_API_URL = 'registration-action';
 // 全局变量存储当前用户
 let currentUser = null;
 
@@ -207,5 +208,87 @@ function loadPublishedEvents() {
 
 // 5. 预留：查看报名名单功能 (给下一个功能模块用)
 function viewRegistrations(eventId) {
-    alert("正在开发中... 即将跳转到活动 [" + eventId + "] 的报名名单页");
+    const modal = $('#list-modal');
+    const tbody = $('#registration-table-body');
+    const exportBtn = $('#export-btn');
+
+    // 1. 显示弹窗
+    modal.removeClass('hidden');
+    tbody.html('<tr><td colspan="4" class="text-center py-8">正在加载名单...</td></tr>');
+
+    // 先解绑旧事件，防止重复绑定
+    exportBtn.off('click');
+    // 默认状态：点击提示加载中
+    exportBtn.click(function() { alert("数据加载中，请稍候..."); });
+    exportBtn.addClass('opacity-50 cursor-not-allowed'); // 视觉禁用
+
+    // 2. 加载数据
+    $.ajax({
+        url: REG_API_URL,
+        type: 'GET',
+        data: {
+            action: 'list_by_event',
+            eventId: eventId
+        },
+        dataType: 'json',
+        success: function(res) {
+            if (res.status === 'success') {
+                const list = res.data;
+                renderRegistrationList(list);
+
+                // 🟢 关键修改：根据是否有数据，决定导出按钮的行为
+                exportBtn.off('click'); // 解绑默认事件
+                exportBtn.removeClass('opacity-50 cursor-not-allowed'); // 恢复视觉
+
+                if (list && list.length > 0) {
+                    // 有数据 -> 允许下载
+                    exportBtn.click(function() {
+                        window.location.href = `${REG_API_URL}?action=export&eventId=${eventId}`;
+                    });
+                } else {
+                    // 无数据 -> 弹窗提示
+                    exportBtn.click(function() {
+                        alert("暂无报名学生，无法导出！");
+                    });
+                }
+
+            } else {
+                tbody.html(`<tr><td colspan="4" class="text-center py-8 text-red-500">${res.message}</td></tr>`);
+            }
+        },
+        error: function() {
+            tbody.html('<tr><td colspan="4" class="text-center py-8 text-red-500">加载失败</td></tr>');
+        }
+    });
+}
+
+function renderRegistrationList(list) {
+    const tbody = $('#registration-table-body');
+    tbody.empty();
+
+    if (!list || list.length === 0) {
+        tbody.html('<tr><td colspan="4" class="text-center py-8 text-gray-400">暂无学生报名</td></tr>');
+        return;
+    }
+
+    list.forEach(reg => {
+        // 简单处理时间格式
+        const regTime = reg.regTime ? reg.regTime.replace('T', ' ').substring(0, 16) : '-';
+
+        const html = `
+            <tr class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900">${reg.contactName || '未知'}</td>
+                <td class="px-6 py-4">${reg.contactPhone || '-'}</td>
+                <td class="px-6 py-4 text-gray-500">${regTime}</td>
+                <td class="px-6 py-4">
+                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">报名成功</span>
+                </td>
+            </tr>
+        `;
+        tbody.append(html);
+    });
+}
+
+function closeListModal() {
+    $('#list-modal').addClass('hidden');
 }

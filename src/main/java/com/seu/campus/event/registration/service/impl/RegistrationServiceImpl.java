@@ -9,6 +9,7 @@ import com.seu.campus.event.registration.model.Registration;
 import com.seu.campus.event.registration.service.RegistrationService;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 报名服务实现类
@@ -52,5 +53,17 @@ public class RegistrationServiceImpl implements RegistrationService {
         reg.setContactPhone(contactPhone);
         reg.setStatus("1");
         return registrationMapper.save(reg) > 0 ? "SUCCESS" : "系统繁忙，请重试";
+    }
+
+    @Override
+    public List<Registration> getRegistrationList(Integer userId, Integer eventId) {
+        // 1. 安全校验：确保当前用户是该活动的发布者 (防止恶意查看)
+        Event event = eventMapper.findById(eventId);
+        if (event == null || !event.getPublisherId().equals(userId)) {
+            return null;
+        }
+
+        // 2. 查询报名列表
+        return registrationMapper.findByEventId(eventId);
     }
 }
