@@ -1,6 +1,7 @@
 /**
  * static/js/index.js
  * 首页的核心逻辑
+ * 已将所有原生 alert/confirm 替换为 showToast/showConfirm (依赖 common.js)
  */
 const USER_API_URL = 'user';
 const EVENT_API_URL = 'event-action';
@@ -101,23 +102,30 @@ function updateHeaderLoggedIn(user) {
 
 /**
  * 执行退出登录
+ * 🟢 替换 confirm 为 showConfirm
  */
 function doLogout() {
-    if (!confirm("确定要退出登录吗？")) return;
-
-    $.ajax({
-        url: USER_API_URL,
-        type: 'POST',
-        data: {action: 'logout'},
-        dataType: 'json',
-        success: function (res) {
-            if (res.status === 'success') {
-                // 退出成功，刷新页面，恢复到未登录状态
-                window.location.reload();
-            } else {
-                alert("退出失败：" + res.message);
+    // <-- 修改在这里：使用 showConfirm 替换原生 confirm
+    showConfirm("确定要退出登录吗？", function() {
+        // 确认后执行 AJAX
+        $.ajax({
+            url: USER_API_URL,
+            type: 'POST',
+            data: {action: 'logout'},
+            dataType: 'json',
+            success: function (res) {
+                if (res.status === 'success') {
+                    // 退出成功，给个 Toast 提示并刷新页面
+                    showToast("退出成功，页面即将刷新...", "success");
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    // ❌ 替换 alert (虽然原来只有成功逻辑，但加上错误处理是好习惯)
+                    showToast("退出失败！" + res.message, "error");
+                }
             }
-        }
+        });
     });
 }
 
@@ -145,7 +153,7 @@ function loadEventList(params = {}) {
         type: 'GET',
         data: requestData,
         dataType: 'json',
-        success: function(res) {
+        success: function (res) {
             if (res.status === 'success' && res.data && res.data.length > 0) {
                 renderEvents(res.data);
             } else {
@@ -163,7 +171,7 @@ function loadEventList(params = {}) {
                 `);
             }
         },
-        error: function() {
+        error: function () {
             container.html('<p class="text-red-500 text-center col-span-full py-10">加载失败，请检查网络</p>');
         }
     });
@@ -253,9 +261,10 @@ function renderEvents(events) {
 function openRegModal(eventId) {
     // A. 检查是否登录
     if (!currentUser) {
-        if (confirm("您需要登录后才能报名活动。\n是否立即跳转到登录页面？")) {
+        // <-- 修改在这里：使用 showConfirm 替换原生 confirm
+        showConfirm("您需要登录后才能报名活动。\n是否立即跳转到登录页面？", function() {
             window.location.href = 'login.html';
-        }
+        });
         return;
     }
 
@@ -280,7 +289,8 @@ function submitRegistration() {
 
     // 简单校验
     if (!name || !phone) {
-        alert("请务必填写真实姓名和联系电话，以便通知！");
+        // <-- 修正 alert 为 showToast
+        showToast("请务必填写真实姓名和联系电话，以便通知！", 'error');
         return;
     }
 
@@ -298,35 +308,37 @@ function submitRegistration() {
         success: function (res) {
             if (res.status === 'success') {
                 closeRegModal();
-                alert("🎉 " + res.message);
+                // <-- 修正 alert 为 showToast，并加上后端消息
+                showToast("🎉 报名成功！" + (res.message ? res.message : ""), "success");
                 // 可选：刷新列表或更改按钮状态
             } else {
-                alert("❌ 报名失败：" + res.message);
-                if (res.code === 'NOT_LOGIN') window.location.href = 'login.html';
+                // <-- 修正 alert 为 showToast，并带上后端错误信息
+                showToast("❌ 报名失败：" + res.message, "error");
+                if (res.code === 'NOT_LOGIN') {
+                    // 延迟跳转，让用户看清提示
+                    setTimeout(function() {
+                        window.location.href = 'login.html';
+                    }, 500);
+                }
             }
         },
         error: function () {
-            alert("服务器网络错误，请稍后重试。");
+            // <-- 修正 alert 为 showToast
+            showToast("服务器网络错误，请稍后重试。", "error");
         }
     });
 }
 
 /**
  * 辅助函数：解析日期字符串用于卡片展示
- * 输入: "2025-10-24 14:00" 或 时间戳
- * 输出: { month: "OCT", day: "24" }
  */
 function parseDateForCard(dateStr) {
     const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
-    // 如果为空，返回默认
     if (!dateStr) return {month: "TBD", day: "--"};
 
-    // 处理 "2025-10-24 14:00" 这种格式 (兼容性处理)
-    // 某些浏览器(Safari)对 yyyy-MM-dd HH:mm 解析可能不稳，替换空格为T更标准
     let date = new Date(dateStr.replace(" ", "T"));
 
-    // 如果解析失败 (Invalid Date)，尝试直接截取字符串
     if (isNaN(date.getTime())) {
         const parts = dateStr.split('-');
         if (parts.length >= 3) {
@@ -356,7 +368,6 @@ function toggleFilterModal() {
     if (modal.hasClass('hidden')) {
         // 打开
         modal.removeClass('hidden');
-        // 延时一小下，让 CSS transition 生效实现淡入
         setTimeout(() => {
             backdrop.removeClass('opacity-0');
             panel.removeClass('scale-95 opacity-0');
@@ -367,35 +378,30 @@ function toggleFilterModal() {
         panel.addClass('scale-95 opacity-0');
         setTimeout(() => {
             modal.addClass('hidden');
-        }, 300); // 等待 transition 结束 (300ms)
+        }, 300);
     }
 }
 
 // 占位函数：应用筛选
 function applyFilter() {
-    // 1. 获取所有值
-    // 过滤掉空值，避免传一堆空字符串给后端 (虽然后端也能处理，但这样更干净)
     const params = {};
 
     const keyword = $('#f-keyword').val().trim();
-    if(keyword) params.keyword = keyword;
+    if (keyword) params.keyword = keyword;
 
     const category = $('#f-category').val();
-    if(category) params.category = category;
+    if (category) params.category = category;
 
     const location = $('#f-location').val().trim();
-    if(location) params.location = location;
+    if (location) params.location = location;
 
     const startDate = $('#f-startDate').val();
-    if(startDate) params.startDate = startDate;
+    if (startDate) params.startDate = startDate;
 
     const endDate = $('#f-endDate').val();
-    if(endDate) params.endDate = endDate;
+    if (endDate) params.endDate = endDate;
 
-    // 2. 关闭弹窗
     toggleFilterModal();
-
-    // 3. 调用加载
     loadEventList(params);
 }
 
@@ -407,9 +413,6 @@ function resetFilter() {
     $('#f-startDate').val('');
     $('#f-endDate').val('');
 
-    // 2. 关闭弹窗 (可选，或者保持打开让用户继续填)
-    // toggleFilterModal();
-
-    // 3. 重新加载所有数据 (传空对象)
+    // 2. 重新加载所有数据 (传空对象)
     loadEventList({});
 }

@@ -70,6 +70,12 @@ public class RegistrationServlet extends HttpServlet {
             case "cancel":
                 doCancel(req, resp);
                 break;
+            case "checkin":
+                doCheckin(req, resp);
+                break;
+            case "reJoin":
+                doReJoin(req, resp);
+                break;
             default:
                 throw new RuntimeException("无效的请求参数");
         }
@@ -116,7 +122,6 @@ public class RegistrationServlet extends HttpServlet {
         Event event = eventMapper.findById(eventId);
 
         // 1. 校验数据是否存在
-        // 🟢 新增逻辑：如果 list 为空，返回一段 JS 脚本弹窗提示，而不是文件流
         if (list == null || list.isEmpty() || event == null) {
             resp.setContentType("text/html;charset=utf-8");
             resp.getWriter().print("<script>alert('该活动暂无报名信息，无需导出！');history.back();</script>");
@@ -130,22 +135,31 @@ public class RegistrationServlet extends HttpServlet {
         resp.setContentType("text/csv; charset=UTF-8");
 
         PrintWriter out = resp.getWriter();
-        out.write('\ufeff');
+        out.write('\ufeff'); // BOM 头
 
-        out.println("报名ID,联系人姓名,联系电话,报名时间,状态");
+        // 🟢 修改表头：增加 "签到状态"
+        out.println("报名ID,联系人姓名,联系电话,报名时间,状态,签到状态");
 
-        // 3. 🟢 准备日期格式化工具
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         for (Registration reg : list) {
             String time = reg.getRegTime() != null ? sdf.format(reg.getRegTime()) : "";
 
-            // 🔴 修改：判断字符串状态
+            // 报名状态描述
             String statusDesc = "待审核";
             if ("approved".equals(reg.getStatus())) {
                 statusDesc = "报名成功";
             } else if ("rejected".equals(reg.getStatus())) {
                 statusDesc = "已拒绝";
+            } else if ("cancelled".equals(reg.getStatus())) { // 增加已取消的判断
+                statusDesc = "已取消";
+            }
+
+            // 🟢 新增：签到状态描述
+            String checkinDesc = "未签到";
+            if (reg.getCheckinStatus() != null && reg.getCheckinStatus() == 1) {
+                checkinDesc = "✅ 已签到";
+                // 如果你想显示签到时间，可以在这里拼上去，例如: "已签到 (" + sdf.format(reg.getCheckinTime()) + ")"
             }
 
             out.println(
@@ -153,7 +167,8 @@ public class RegistrationServlet extends HttpServlet {
                             safeCsv(reg.getContactName()) + "," +
                             "\t" + safeCsv(reg.getContactPhone()) + "," +
                             time + "," +
-                            statusDesc
+                            statusDesc + "," +
+                            checkinDesc // 🟢 追加最后一列
             );
         }
         out.flush();
@@ -271,6 +286,82 @@ public class RegistrationServlet extends HttpServlet {
             e.printStackTrace();
             result.put("status", "error");
             result.put("message", "参数错误");
+        }
+        writeJson(resp, result);
+    }
+
+    private void doCheckin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        HttpSession session = req.getSession(false);
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        if (currentUser == null) {
+            result.put("status", "fail");
+            result.put("message", "未登录");
+            writeJson(resp, result);
+            return;
+        }
+
+        try {
+            Integer eventId = Integer.parseInt(req.getParameter("eventId"));
+            String inputCode = req.getParameter("inputCode");
+
+            if (inputCode == null || inputCode.trim().isEmpty()) {
+                result.put("status", "fail");
+                result.put("message", "请输入签到码");
+                writeJson(resp, result);
+                return;
+            }
+
+            // 调用 Service (需要在 RegistrationService 中实现 verifyCheckin)
+            String msg = registrationService.verifyCheckin(currentUser.getUserId(), eventId, inputCode);
+
+            if ("SUCCESS".equals(msg)) {
+                result.put("status", "success");
+                result.put("message", "签到成功！");
+            } else {
+                result.put("status", "fail");
+                result.put("message", msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "系统繁忙");
+        }
+        writeJson(resp, result);
+    }
+
+    private void doReJoin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        HttpSession session = req.getSession(false);
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        if (currentUser == null) {
+            result.put("status", "fail");
+            result.put("message", "未登录");
+            writeJson(resp, result);
+            return;
+        }
+
+        try {
+            // 前端传 eventId 即可
+            Integer eventId = Integer.parseInt(req.getParameter("eventId"));
+
+            String msg = registrationService.reJoin(currentUser.getUserId(), eventId);
+
+            if ("SUCCESS".equals(msg)) {
+                result.put("status", "success");
+                result.put("message", "重新报名成功！");
+            } else {
+                result.put("status", "fail");
+                result.put("message", msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "系统繁忙");
         }
         writeJson(resp, result);
     }

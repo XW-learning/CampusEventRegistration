@@ -45,4 +45,23 @@ public interface RegistrationService {
      */
     String cancel(Integer userId, Integer eventId, String reason);
 
+    /**
+     * 签到
+     *
+     * @param userId    当前登录用户ID
+     * @param eventId   要签到的活动ID
+     * @param inputCode 输入的签到码
+     * @return 处理结果 ("SUCCESS" 或 错误提示信息)
+     */
+    String verifyCheckin(Integer userId, Integer eventId, String inputCode);
+
+    /**
+     * 重新报名
+     *
+     * @param userId  当前登录用户ID
+     * @param eventId 要重新报名的活动ID
+     * @return 处理结果
+     */
+    String reJoin(Integer userId, Integer eventId);
+
 }

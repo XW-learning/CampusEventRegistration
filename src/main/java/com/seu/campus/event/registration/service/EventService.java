@@ -44,4 +44,14 @@ public interface EventService {
      * @return 活动列表
      */
     List<Event> searchEvents(String keyword, String category, String location, String startDateStr, String endDateStr);
+
+    /**
+     * 设置签到码
+     *
+     * @param userId  用户 ID
+     * @param eventId 活动 ID
+     * @param code    签到码
+     * @return 状态信息
+     */
+    String setCheckinCode(Integer userId, Integer eventId, String code);
 }

@@ -84,5 +84,16 @@ public class EventServiceImpl implements EventService {
 
         return eventMapper.search(keyword, category, location, startDate, endDate);
     }
+
+    @Override
+    public String setCheckinCode(Integer userId, Integer eventId, String code) {
+        Event event = eventMapper.findById(eventId);
+        if (event == null || !event.getPublisherId().equals(userId)) {
+            return "权限不足";
+        }
+
+        eventMapper.updateCheckinCode(eventId, code);
+        return "SUCCESS";
+    }
 }
 

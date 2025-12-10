@@ -53,4 +53,17 @@ public class RegistrationMapperImpl implements RegistrationMapper {
         String sql = "UPDATE t_registration SET status = 'cancelled', cancel_reason = ? WHERE user_id = ? AND event_id = ?";
         return DBUtil.update(sql, reason, userId, eventId);
     }
+
+    @Override
+    public void updateCheckinStatus(Integer userId, Integer eventId, Integer status, Date time) {
+        String sql = "UPDATE t_registration SET checkin_status = ?, checkin_time = ? WHERE user_id = ? AND event_id = ?";
+        DBUtil.update(sql, status, time, userId, eventId);
+    }
+
+    @Override
+    public int reJoin(Integer userId, Integer eventId) {
+        // 逻辑：将状态改为 pending，同时 重新报名次数 + 1
+        String sql = "UPDATE t_registration SET status = 'pending', re_join_count = re_join_count + 1 WHERE user_id = ? AND event_id = ?";
+        return DBUtil.update(sql, userId, eventId);
+    }
 }

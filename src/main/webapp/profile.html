@@ -136,6 +136,7 @@
                     <th class="px-6 py-3 font-medium">联系电话</th>
                     <th class="px-6 py-3 font-medium">报名时间</th>
                     <th class="px-6 py-3 font-medium text-center">当前状态</th>
+                    <th class="px-6 py-3 font-medium text-center">签到状态</th>
                 </tr>
                 </thead>
                 <tbody id="registration-table-body" class="divide-y divide-gray-100 text-gray-600">
@@ -171,6 +172,42 @@
     </div>
 </div>
 
+<div id="set-code-modal" class="fixed inset-0 z-[110] hidden">
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="closeSetCodeModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 transform transition-all">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">🏁 设置现场签到码</h3>
+        <p class="text-sm text-gray-500 mb-4">设置后，学生需输入此码才能完成签到。</p>
+
+        <input type="text" id="admin-checkin-code" placeholder="输入 4-6 位数字或字母"
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-center text-xl font-mono tracking-widest uppercase mb-6">
+
+        <div class="flex gap-3">
+            <button onclick="submitCheckinCode()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">保存设置</button>
+            <button onclick="closeSetCodeModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 rounded-lg font-medium transition">取消</button>
+        </div>
+        <input type="hidden" id="set-code-eventId">
+    </div>
+</div>
+
+<div id="student-checkin-modal" class="fixed inset-0 z-[110] hidden">
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="closeCheckinModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 transform transition-all text-center">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">活动签到</h3>
+        <p class="text-sm text-gray-500 mb-6">请输入现场公布的签到码</p>
+
+        <input type="text" id="student-input-code" placeholder="输入签到码"
+               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-center text-2xl font-mono tracking-widest uppercase mb-6">
+
+        <button onclick="submitStudentCheckin()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold text-lg shadow-md transition transform active:scale-95">
+            确认签到
+        </button>
+        <input type="hidden" id="checkin-eventId">
+    </div>
+</div>
 </body>
 <script src="static/js/profile.js"></script>
+<script src="static/js/common.js"></script>
 </html>

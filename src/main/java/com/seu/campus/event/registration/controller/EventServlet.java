@@ -63,6 +63,8 @@ public class EventServlet extends HttpServlet {
             case "publish":
                 doPublish(req, resp);
                 break;
+            case "set_checkin_code":
+                doSetCheckinCode(req, resp);
             default:
                 writeJson(resp, Map.of("status", "error", "message", "未知指令"));
                 break;
@@ -110,11 +112,25 @@ public class EventServlet extends HttpServlet {
             return;
         }
 
-        // 获取类型：published (我发布的) 或 joined (我报名的)
         String type = req.getParameter("type");
 
         try {
             List<Event> events = eventService.findMyEvents(currentUser.getUserId(), type);
+
+            // 🛡️ 安全处理：如果是学生查看自己报名的活动 (joined)，不能返回真实的 checkinCode
+            if ("joined".equals(type)) {
+                for (Event e : events) {
+                    // 1. 设置虚拟字段：告诉前端“有没有码”
+                    boolean hasCode = e.getCheckinCode() != null && !e.getCheckinCode().isEmpty();
+                    e.setHasCheckinCode(hasCode);
+
+                    // 2. 擦除真实字段：防止学生通过 F12 抓包偷看签到码
+                    e.setCheckinCode(null);
+                }
+            } else if ("published".equals(type)) {
+                // 如果是组织者查看发布的活动，保留 checkinCode 方便他在前端修改
+            }
+
             result.put("status", "success");
             result.put("data", events);
         } catch (Exception e) {
@@ -198,6 +214,41 @@ public class EventServlet extends HttpServlet {
             result.put("message", "系统繁忙");
         }
 
+        writeJson(resp, result);
+    }
+
+    private void doSetCheckinCode(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        HttpSession session = req.getSession(false);
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        if (currentUser == null) {
+            result.put("status", "fail");
+            result.put("message", "未登录");
+            writeJson(resp, result);
+            return;
+        }
+
+        try {
+            Integer eventId = Integer.parseInt(req.getParameter("eventId"));
+            String code = req.getParameter("code");
+
+            // 调用 Service (需要在 EventService 中实现 setCheckinCode)
+            String msg = eventService.setCheckinCode(currentUser.getUserId(), eventId, code);
+
+            if ("SUCCESS".equals(msg)) {
+                result.put("status", "success");
+                result.put("message", "签到码设置成功");
+            } else {
+                result.put("status", "fail");
+                result.put("message", msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "参数错误");
+        }
         writeJson(resp, result);
     }
 

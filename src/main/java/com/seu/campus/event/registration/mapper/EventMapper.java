@@ -63,4 +63,13 @@ public interface EventMapper {
      */
     List<Event> search(String keyword, String category, String location, Date startDate, Date endDate);
 
+    /**
+     * 更新签到码
+     *
+     * @param eventId 活动 ID
+     * @param code    签到码
+     * @return 影响行数
+     */
+    int updateCheckinCode(Integer eventId, String code);
+
 }

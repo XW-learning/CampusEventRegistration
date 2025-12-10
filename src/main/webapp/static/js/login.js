@@ -1,5 +1,6 @@
 // src/main/webapp/static/js/login.js
 const LOGIN_API_URL = 'user'
+
 /**
  * 切换视图模式
  * @param mode 'login' | 'register'
@@ -24,7 +25,8 @@ function doLogin() {
     const password = $('#login-password').val().trim();
 
     if (!username || !password) {
-        alert("请填写完整的账号和密码！");
+        // <-- 修改在这里：修正提示语，使用 error 类型
+        showToast("请填写完整的账号和密码！", "error");
         return;
     }
 
@@ -39,14 +41,20 @@ function doLogin() {
         dataType: 'json',
         success: function (res) {
             if (res.status === 'success') {
-                window.location.href = 'index.html';
+                // <-- 修改在这里：成功提示后延迟跳转
+                showToast("🎉 登录成功！正在跳转...", "success");
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 500);
             } else {
-                alert("登录失败：" + res.message);
+                // <-- 修改在这里：修正为 "登录失败：" + 后端返回的具体错误信息
+                showToast("登录失败：" + res.message, "error");
             }
         },
         error: function (xhr, status, error) {
             console.error(error);
-            alert("服务器连接错误。");
+            // <-- 修改在这里：服务器连接错误提示
+            showToast("服务器连接错误，请稍后重试。", "error");
         }
     });
 }
@@ -62,7 +70,8 @@ function doRegister() {
     const role = $('input[name="role"]:checked').val();
 
     if (!username || !password || !realName) {
-        alert("带 * 号的字段不能为空！");
+        // <-- 修改在这里：修正提示语
+        showToast("带 * 号的字段不能为空！", "error");
         return;
     }
 
@@ -80,15 +89,18 @@ function doRegister() {
         dataType: 'json',
         success: function (res) {
             if (res.status === 'success') {
-                alert("🎉 注册成功！请使用新账号登录。");
+                // <-- 修改在这里：注册成功提示
+                showToast("🎉 注册成功！请使用新账号登录。", "success");
                 $('#register-form')[0].reset();
                 switchMode('login');
             } else {
-                alert("注册失败：" + res.message);
+                // <-- 修改在这里：修正为 "注册失败：" + 后端返回的具体错误信息
+                showToast("注册失败：" + res.message, "error");
             }
         },
         error: function () {
-            alert("服务器连接错误。");
+            // <-- 修改在这里：服务器连接错误提示
+            showToast("服务器连接错误，请稍后重试。", "error");
         }
     });
 }

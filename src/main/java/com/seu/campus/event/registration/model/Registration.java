@@ -18,12 +18,14 @@ public class Registration {
     private String contactName;
     private String contactPhone;
     private String cancelReason;
-
+    private Integer checkinStatus;
+    private Date checkinTime;
+    private Integer reJoinCount;
     // 无参构造
     public Registration() {
     }
 
-    public Registration(Integer regId, Integer eventId, Integer userId, Date regTime, String status, Integer isSignedIn, String contactName, String contactPhone, String cancelReason) {
+    public Registration(Integer regId, Integer eventId, Integer userId, Date regTime, String status, Integer isSignedIn, String contactName, String contactPhone, String cancelReason, Integer checkinStatus, Date checkinTime, Integer reJoinCount) {
         this.regId = regId;
         this.eventId = eventId;
         this.userId = userId;
@@ -33,6 +35,9 @@ public class Registration {
         this.contactName = contactName;
         this.contactPhone = contactPhone;
         this.cancelReason = cancelReason;
+        this.checkinStatus = checkinStatus;
+        this.checkinTime = checkinTime;
+        this.reJoinCount = reJoinCount;
     }
 
     // Getter / Setter
@@ -106,5 +111,47 @@ public class Registration {
 
     public void setCancelReason(String cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public Integer getCheckinStatus() {
+        return checkinStatus;
+    }
+
+    public void setCheckinStatus(Integer checkinStatus) {
+        this.checkinStatus = checkinStatus;
+    }
+
+    public Date getCheckinTime() {
+        return checkinTime;
+    }
+
+    public void setCheckinTime(Date checkinTime) {
+        this.checkinTime = checkinTime;
+    }
+
+    public Integer getReJoinCount() {
+        return reJoinCount;
+    }
+
+    public void setReJoinCount(Integer reJoinCount) {
+        this.reJoinCount = reJoinCount;
+    }
+
+    @Override
+    public String toString() {
+        return "Registration{" +
+                "regId=" + regId +
+                ", eventId=" + eventId +
+                ", userId=" + userId +
+                ", regTime=" + regTime +
+                ", status='" + status + '\'' +
+                ", isSignedIn=" + isSignedIn +
+                ", contactName='" + contactName + '\'' +
+                ", contactPhone='" + contactPhone + '\'' +
+                ", cancelReason='" + cancelReason + '\'' +
+                ", checkinStatus=" + checkinStatus +
+                ", checkinTime=" + checkinTime +
+                ", reJoinCount=" + reJoinCount +
+                '}';
     }
 }

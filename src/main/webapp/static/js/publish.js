@@ -1,6 +1,7 @@
 /**
  * static/js/publish.js
  * 活动发布页面的逻辑
+ * 已将所有原生 alert 替换为 showToast (依赖 common.js)
  */
 const PUBLISH_API_URL = 'event-action';
 
@@ -30,7 +31,8 @@ function submitEvent() {
 
     // 2. 简单的前端校验
     if (!title || !location || !startTime || !endTime) {
-        alert("请填写完整的活动必填信息（标题、地点、时间）！");
+        // <-- 修改在这里：使用 showToast 替代 alert
+        showToast("请填写完整的活动必填信息（标题、地点、时间）！", "error");
         return;
     }
 
@@ -51,19 +53,30 @@ function submitEvent() {
         dataType: 'json',
         success: function (res) {
             if (res.status === 'success') {
-                alert("🎉 活动发布成功！即将返回首页...");
-                window.location.href = 'index.html';
+                // <-- 修改在这里：使用 showToast 替代 alert
+                showToast("🎉 活动发布成功！即将返回首页...", "success");
+
+                // 延迟跳转，确保用户能看到 Toast 提示
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 1000);
+
             } else {
-                alert("发布失败：" + res.message);
+                // <-- 修改在这里：使用 showToast 替代 alert
+                showToast("发布失败：" + res.message, "error");
+
                 // 如果是因为未登录，跳转去登录页
                 if (res.message.includes("登录")) {
-                    window.location.href = 'login.html';
+                    setTimeout(function() {
+                        window.location.href = 'login.html';
+                    }, 500);
                 }
             }
         },
         error: function (xhr, status, error) {
             console.error(error);
-            alert("服务器连接错误，请检查网络或控制台日志。");
+            // <-- 修改在这里：使用 showToast 替代 alert
+            showToast("服务器连接错误，请检查网络或控制台日志。", "error");
         }
     });
 }

@@ -102,4 +102,50 @@ public class RegistrationServiceImpl implements RegistrationService {
         int rows = registrationMapper.cancel(userId, eventId, reason);
         return rows > 0 ? "SUCCESS" : "取消失败，系统错误";
     }
+
+    @Override
+    public String verifyCheckin(Integer userId, Integer eventId, String inputCode) {
+        Event event = eventMapper.findById(eventId);
+        if (event == null || event.getCheckinCode() == null) {
+            return "活动未开启签到";
+        }
+
+        // 忽略大小写比较
+        if (!event.getCheckinCode().equalsIgnoreCase(inputCode.trim())) {
+            return "签到码错误";
+        }
+
+        // 更新状态
+        registrationMapper.updateCheckinStatus(userId, eventId, 1, new Date());
+        return "SUCCESS";
+    }
+
+    @Override
+    public String reJoin(Integer userId, Integer eventId) {
+        // 1. 查询当前记录
+        Registration reg = registrationMapper.findByEventIdAndUserId(eventId, userId);
+
+        if (reg == null) {
+            return "未找到原来的报名记录";
+        }
+
+        // 2. 只有“已取消”状态才能重新报名
+        // 注意：你数据库里存的是 "cancelled" (英文)，我在 MapperImpl 里看到了
+        if (!"cancelled".equals(reg.getStatus())) {
+            return "当前状态无法重新报名";
+        }
+
+        // 3. 检查次数限制 (使用你在实体类里加的 reJoinCount 字段)
+        // 如果数据库字段默认为 NULL，Java 对象里可能是 null，要注意判空
+        int currentCount = reg.getReJoinCount() == null ? 0 : reg.getReJoinCount();
+
+        if (currentCount >= 3) {
+            return "您的重新报名次数已用完（限3次）";
+        }
+
+        // 4. 执行更新
+        int rows = registrationMapper.reJoin(userId, eventId);
+        return rows > 0 ? "SUCCESS" : "操作失败，请重试";
+    }
+
 }

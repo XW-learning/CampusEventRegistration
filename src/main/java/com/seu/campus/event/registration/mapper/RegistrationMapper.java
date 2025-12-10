@@ -2,6 +2,7 @@ package com.seu.campus.event.registration.mapper;
 
 import com.seu.campus.event.registration.model.Registration;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,4 +52,23 @@ public interface RegistrationMapper {
      * @return 影响行数
      */
     int cancel(Integer userId, Integer eventId, String reason);
+
+    /**
+     * 更新签到状态
+     *
+     * @param userId  用户 ID
+     * @param eventId 活动 ID
+     * @param status  签到状态
+     * @param time    签到时间
+     */
+    void updateCheckinStatus(Integer userId, Integer eventId, Integer status, Date time);
+
+    /**
+     * 重新报名（状态改回 pending，且次数+1）
+     *
+     * @param userId  用户 ID
+     * @param eventId 活动 ID
+     * @return 影响行数
+     */
+    int reJoin(Integer userId, Integer eventId);
 }
