@@ -51,7 +51,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         reg.setEventId(eventId);
         reg.setContactName(contactName);
         reg.setContactPhone(contactPhone);
-        reg.setStatus("1");
+        reg.setStatus("pending");
         return registrationMapper.save(reg) > 0 ? "SUCCESS" : "系统繁忙，请重试";
     }
 
@@ -65,5 +65,41 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         // 2. 查询报名列表
         return registrationMapper.findByEventId(eventId);
+    }
+
+    @Override
+    public String audit(String regIdsStr, String status) {
+        if (regIdsStr == null || regIdsStr.isEmpty()) return "未选择任何记录";
+
+        String[] ids = regIdsStr.split(",");
+        int count = 0;
+
+        for (String idStr : ids) {
+            try {
+                Integer regId = Integer.parseInt(idStr);
+                count += registrationMapper.updateStatus(regId, status);
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+        }
+        return count > 0 ? "SUCCESS" : "审核失败：未更新任何记录";
+    }
+
+    @Override
+    public String cancel(Integer userId, Integer eventId, String reason) {
+        // 1. 检查是否存在
+        Registration reg = registrationMapper.findByEventIdAndUserId(eventId, userId);
+        if (reg == null) {
+            return "未找到报名记录";
+        }
+
+        // 2. 检查是否已经取消 (避免重复提交)
+        if ("cancelled".equals(reg.getStatus())) {
+            return "该报名已取消";
+        }
+
+        // 3. 执行取消
+        int rows = registrationMapper.cancel(userId, eventId, reason);
+        return rows > 0 ? "SUCCESS" : "取消失败，系统错误";
     }
 }

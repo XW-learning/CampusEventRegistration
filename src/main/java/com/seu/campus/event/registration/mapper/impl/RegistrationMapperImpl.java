@@ -21,8 +21,7 @@ public class RegistrationMapperImpl implements RegistrationMapper {
                 reg.getUserId(),
                 reg.getContactName(),
                 reg.getContactPhone(),
-                reg.getStatus() == null ? 0 : reg.getStatus(),
-                // 🟢 修改点 2：显式传入当前时间对象
+                reg.getStatus() == null ? "pending" : reg.getStatus(),
                 new Date()
         );
     }
@@ -39,7 +38,19 @@ public class RegistrationMapperImpl implements RegistrationMapper {
 
     @Override
     public List<Registration> findByEventId(Integer eventId) {
-        String sql = "SELECT * FROM t_registration WHERE event_id = ? ORDER BY reg_time DESC";
+        String sql = "SELECT * FROM t_registration WHERE event_id = ? AND status != 'cancelled' ORDER BY reg_time DESC";
         return DBUtil.query(sql, Registration.class, eventId);
+    }
+
+    @Override
+    public int updateStatus(Integer regId, String status) {
+        String sql = "UPDATE t_registration SET status = ? WHERE reg_id = ?";
+        return DBUtil.update(sql, status, regId);
+    }
+
+    @Override
+    public int cancel(Integer userId, Integer eventId, String reason) {
+        String sql = "UPDATE t_registration SET status = 'cancelled', cancel_reason = ? WHERE user_id = ? AND event_id = ?";
+        return DBUtil.update(sql, reason, userId, eventId);
     }
 }

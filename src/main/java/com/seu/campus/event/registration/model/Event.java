@@ -19,6 +19,8 @@ public class Event {
     private String detail;
     private Integer publisherId;
     private Integer isActive;
+    // 🟢 新增字段：用于存储当前用户的报名状态 (查询"我的报名"时使用)
+    private String registrationStatus;
 
     // 无参构造
     public Event() {
@@ -103,5 +105,13 @@ public class Event {
 
     public void setIsActive(Integer isActive) {
         this.isActive = isActive;
+    }
+
+    public String getRegistrationStatus() {
+        return registrationStatus;
+    }
+
+    public void setRegistrationStatus(String registrationStatus) {
+        this.registrationStatus = registrationStatus;
     }
 }

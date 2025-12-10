@@ -39,28 +39,22 @@
 <div class="h-[60px]"></div>
 
 <main class="flex-grow container mx-auto px-6 py-8">
+
     <div class="flex items-center justify-between mb-8">
         <h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-4">校园活动概览</h2>
+
+        <button id="filter-toggle-btn"
+                onclick="toggleFilterModal()"
+                class="flex items-center gap-2 text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 transition-colors duration-200 px-4 py-2 rounded-full font-medium shadow-md">
+
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <span>筛选</span>
+        </button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="event-container">
-        <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden group border border-gray-100">
-            <div class="h-40 bg-gray-200 w-full relative overflow-hidden">
-                <div class="absolute inset-0 bg-blue-100 flex items-center justify-center text-gray-400">封面图</div>
-                <span class="absolute top-2 right-2 bg-green-100 text-green-600 text-xs px-2 py-1 rounded">报名中</span>
-            </div>
-            <div class="p-5">
-                <h3 class="text-lg font-bold text-gray-800 mb-2 truncate">演示活动：Java编程大赛</h3>
-                <div class="space-y-2 text-sm text-gray-500">
-                    <p>📅 2025-10-24</p>
-                    <p>📍 计算机楼</p>
-                </div>
-                <button class="w-full mt-4 bg-blue-50 text-blue-600 py-2 rounded-lg font-medium hover:bg-blue-500 hover:text-white transition-colors">
-                    立即报名
-                </button>
-            </div>
-        </div>
-
     </div>
 </main>
 
@@ -114,6 +108,80 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<div id="filter-modal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+
+    <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity opacity-0" id="filter-backdrop" onclick="toggleFilterModal()"></div>
+
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+
+            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg scale-95 opacity-0" id="filter-panel">
+
+                <div class="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b border-blue-100 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <span class="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        </span>
+                        活动筛选条件
+                    </h3>
+                    <button type="button" onclick="toggleFilterModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+
+                <div class="px-6 py-6 space-y-5">
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">🔍 关键字</label>
+                        <input type="text" id="f-keyword" placeholder="搜索活动名称、描述..."
+                               class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm placeholder-gray-400">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">🏷️ 类别</label>
+                            <select id="f-category" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all outline-none text-sm text-gray-600 appearance-none">
+                                <option value="">全部类别</option>
+                                <option value="学术讲座">学术讲座</option>
+                                <option value="体育竞技">体育竞技</option>
+                                <option value="文艺汇演">文艺汇演</option>
+                                <option value="社团活动">社团活动</option>
+                                <option value="公益志愿">公益志愿</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">📍 地点</label>
+                            <input type="text" id="f-location" placeholder="例如: 大活"
+                                   class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all outline-none text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">📅 时间范围</label>
+                        <div class="flex items-center gap-3">
+                            <input type="date" id="f-startDate" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <span class="text-gray-400">-</span>
+                            <input type="date" id="f-endDate" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-4 flex flex-row-reverse gap-3 border-t border-gray-100">
+                    <button type="button" onclick="applyFilter()"
+                            class="w-full sm:w-auto inline-flex justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-500 hover:shadow-lg transition-all active:scale-95">
+                        应用筛选
+                    </button>
+                    <button type="button" onclick="resetFilter()"
+                            class="w-full sm:w-auto inline-flex justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all">
+                        重置条件
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

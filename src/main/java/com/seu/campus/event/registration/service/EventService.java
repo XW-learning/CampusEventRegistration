@@ -32,4 +32,16 @@ public interface EventService {
      * @return 活动列表
      */
     List<Event> findMyEvents(Integer userId, String type);
+
+    /**
+     * 搜索活动
+     *
+     * @param keyword      关键词
+     * @param category     活动类别
+     * @param location     活动地点
+     * @param startDateStr 开始时间
+     * @param endDateStr   结束时间
+     * @return 活动列表
+     */
+    List<Event> searchEvents(String keyword, String category, String location, String startDateStr, String endDateStr);
 }

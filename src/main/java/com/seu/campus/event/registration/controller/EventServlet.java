@@ -32,7 +32,7 @@ public class EventServlet extends HttpServlet {
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=utf-8");
 
@@ -53,7 +53,7 @@ public class EventServlet extends HttpServlet {
 
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=utf-8");
 
@@ -72,15 +72,28 @@ public class EventServlet extends HttpServlet {
 
     private void doList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Map<String, Object> result = new HashMap<>();
+
         try {
-            List<Event> events = eventService.findAllActiveEvents();
+            // 1. 获取筛选参数 (如果没有传就是 null 或空字符串)
+            String keyword = req.getParameter("keyword");
+            String category = req.getParameter("category");
+            String location = req.getParameter("location");
+            String startDate = req.getParameter("startDate");
+            String endDate = req.getParameter("endDate");
+
+            // 2. 调用业务层 (统一走 search 逻辑，如果参数全空，search 方法内部逻辑也支持查所有)
+            List<Event> events = eventService.searchEvents(keyword, category, location, startDate, endDate);
+
+            // 3. 封装结果
             result.put("status", "success");
             result.put("data", events);
+
         } catch (Exception e) {
             e.printStackTrace();
             result.put("status", "error");
             result.put("message", "查询失败");
         }
+
         writeJson(resp, result);
     }
 

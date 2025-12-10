@@ -122,28 +122,49 @@ function doLogout() {
 }
 
 /**
- * 加载活动列表并渲染
+ * 加载活动列表 (支持筛选参数)
+ * @param {Object} params - 可选，筛选条件 { keyword, category, ... }
  */
-function loadEventList() {
+function loadEventList(params = {}) {
     const container = $('#event-container');
 
-    // 显示加载中提示
-    container.html('<p class="text-gray-500 text-center col-span-3 py-10">正在加载精彩活动...</p>');
+    // 如果是筛选模式，给个不同的提示
+    const isFilterMode = Object.keys(params).length > 0;
+    const loadingText = isFilterMode ? '🔍 正在筛选活动...' : '正在加载精彩活动...';
+
+    container.html(`<p class="text-gray-500 text-center col-span-full py-10">${loadingText}</p>`);
+
+    // 合并基础参数 action='list' 和传入的筛选 params
+    const requestData = {
+        action: 'list',
+        ...params
+    };
 
     $.ajax({
         url: EVENT_API_URL,
         type: 'GET',
-        data: {action: 'list'}, // 告诉后端我们要 list
+        data: requestData,
         dataType: 'json',
-        success: function (res) {
-            if (res.status === 'success' && res.data) {
+        success: function(res) {
+            if (res.status === 'success' && res.data && res.data.length > 0) {
                 renderEvents(res.data);
             } else {
-                container.html('<p class="text-gray-500 text-center col-span-3 py-10">暂无活动信息</p>');
+                // 如果没查到数据
+                const emptyText = isFilterMode
+                    ? '没有找到符合条件的活动，试着调整一下筛选条件？'
+                    : '暂无活动信息';
+
+                container.html(`
+                    <div class="col-span-full text-center py-16">
+                        <div class="text-6xl mb-4">🍃</div>
+                        <p class="text-gray-500 text-lg">${emptyText}</p>
+                        ${isFilterMode ? '<button onclick="resetFilter()" class="mt-4 text-blue-600 hover:underline">清空筛选条件</button>' : ''}
+                    </div>
+                `);
             }
         },
-        error: function () {
-            container.html('<p class="text-red-500 text-center col-span-3 py-10">加载失败，请检查网络</p>');
+        error: function() {
+            container.html('<p class="text-red-500 text-center col-span-full py-10">加载失败，请检查网络</p>');
         }
     });
 }
@@ -323,4 +344,72 @@ function parseDateForCard(dateStr) {
         month: monthNames[date.getMonth()],
         day: String(date.getDate()).padStart(2, '0')
     };
+}
+
+// --- 5. 筛选弹窗交互逻辑 ---
+
+function toggleFilterModal() {
+    const modal = $('#filter-modal');
+    const backdrop = $('#filter-backdrop');
+    const panel = $('#filter-panel');
+
+    if (modal.hasClass('hidden')) {
+        // 打开
+        modal.removeClass('hidden');
+        // 延时一小下，让 CSS transition 生效实现淡入
+        setTimeout(() => {
+            backdrop.removeClass('opacity-0');
+            panel.removeClass('scale-95 opacity-0');
+        }, 10);
+    } else {
+        // 关闭 (先淡出，再隐藏)
+        backdrop.addClass('opacity-0');
+        panel.addClass('scale-95 opacity-0');
+        setTimeout(() => {
+            modal.addClass('hidden');
+        }, 300); // 等待 transition 结束 (300ms)
+    }
+}
+
+// 占位函数：应用筛选
+function applyFilter() {
+    // 1. 获取所有值
+    // 过滤掉空值，避免传一堆空字符串给后端 (虽然后端也能处理，但这样更干净)
+    const params = {};
+
+    const keyword = $('#f-keyword').val().trim();
+    if(keyword) params.keyword = keyword;
+
+    const category = $('#f-category').val();
+    if(category) params.category = category;
+
+    const location = $('#f-location').val().trim();
+    if(location) params.location = location;
+
+    const startDate = $('#f-startDate').val();
+    if(startDate) params.startDate = startDate;
+
+    const endDate = $('#f-endDate').val();
+    if(endDate) params.endDate = endDate;
+
+    // 2. 关闭弹窗
+    toggleFilterModal();
+
+    // 3. 调用加载
+    loadEventList(params);
+}
+
+function resetFilter() {
+    // 1. 清空输入框 UI
+    $('#f-keyword').val('');
+    $('#f-category').val('');
+    $('#f-location').val('');
+    $('#f-startDate').val('');
+    $('#f-endDate').val('');
+
+    // 2. 关闭弹窗 (可选，或者保持打开让用户继续填)
+    // toggleFilterModal();
+
+    // 3. 重新加载所有数据 (传空对象)
+    loadEventList({});
 }

@@ -5,6 +5,8 @@ import com.seu.campus.event.registration.mapper.impl.EventMapperImpl;
 import com.seu.campus.event.registration.model.Event;
 import com.seu.campus.event.registration.service.EventService;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,6 +59,30 @@ public class EventServiceImpl implements EventService {
             return eventMapper.findRegisteredByUserId(userId);
         }
         return List.of();
+    }
+
+    @Override
+    public List<Event> searchEvents(String keyword, String category, String location, String startDateStr, String endDateStr) {
+        Date startDate = null;
+        Date endDate = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        try {
+            // 处理日期：前端传的是 yyyy-MM-dd
+            if (startDateStr != null && !startDateStr.isEmpty()) {
+                // 补全时间为当天的 00:00:00
+                startDate = sdf.parse(startDateStr + " 00:00:00");
+            }
+            if (endDateStr != null && !endDateStr.isEmpty()) {
+                // 补全时间为当天的 23:59:59，确保包含当天活动
+                endDate = sdf.parse(endDateStr + " 23:59:59");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 日期格式错误时忽略日期条件，防止报错
+        }
+
+        return eventMapper.search(keyword, category, location, startDate, endDate);
     }
 }
 

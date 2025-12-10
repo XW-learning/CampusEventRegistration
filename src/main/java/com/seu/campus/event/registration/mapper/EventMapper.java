@@ -3,6 +3,7 @@ package com.seu.campus.event.registration.mapper;
 import com.seu.campus.event.registration.model.Event;
 
 import java.util.List;
+import java.util.Date;
 
 /**
  * 活动数据访问层接口
@@ -49,5 +50,17 @@ public interface EventMapper {
      * @return 活动列表
      */
     List<Event> findRegisteredByUserId(Integer userId);
+
+    /**
+     * 多条件组合筛选活动
+     *
+     * @param keyword   关键字 (标题或详情)
+     * @param category  分类
+     * @param location  地点
+     * @param startDate 开始日期范围 - 起始
+     * @param endDate   开始日期范围 - 结束
+     * @return 符合条件的活动列表
+     */
+    List<Event> search(String keyword, String category, String location, Date startDate, Date endDate);
 
 }

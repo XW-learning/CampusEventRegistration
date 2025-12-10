@@ -17,12 +17,13 @@ public class Registration {
     private Integer isSignedIn;
     private String contactName;
     private String contactPhone;
+    private String cancelReason;
 
     // 无参构造
     public Registration() {
     }
 
-    public Registration(Integer regId, Integer eventId, Integer userId, Date regTime, String status, Integer isSignedIn, String contactName, String contactPhone) {
+    public Registration(Integer regId, Integer eventId, Integer userId, Date regTime, String status, Integer isSignedIn, String contactName, String contactPhone, String cancelReason) {
         this.regId = regId;
         this.eventId = eventId;
         this.userId = userId;
@@ -31,6 +32,7 @@ public class Registration {
         this.isSignedIn = isSignedIn;
         this.contactName = contactName;
         this.contactPhone = contactPhone;
+        this.cancelReason = cancelReason;
     }
 
     // Getter / Setter
@@ -96,5 +98,13 @@ public class Registration {
 
     public void setContactPhone(String contactPhone) {
         this.contactPhone = contactPhone;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }

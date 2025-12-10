@@ -26,4 +26,23 @@ public interface RegistrationService {
      * @return 报名信息列表
      */
     List<Registration> getRegistrationList(Integer userId, Integer eventId);
+
+    /**
+     * 批量审核
+     *
+     * @param regIdsStr 逗号分隔的ID字符串 (如 "101,102,103")
+     * @param status    目标状态 (1:通过, 2:拒绝)
+     */
+    String audit(String regIdsStr, String status);
+
+    /**
+     * 取消报名
+     *
+     * @param userId  当前登录用户ID
+     * @param eventId 要取消报名的活动ID
+     * @param reason  取消报名的原因
+     * @return 处理结果 ("SUCCESS" 或 错误提示信息)
+     */
+    String cancel(Integer userId, Integer eventId, String reason);
+
 }

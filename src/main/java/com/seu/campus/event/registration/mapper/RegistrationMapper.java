@@ -32,4 +32,23 @@ public interface RegistrationMapper {
      * @return 报名信息列表
      */
     List<Registration> findByEventId(Integer eventId);
+
+    /**
+     * 修改报名状态
+     *
+     * @param regId   报名 ID
+     * @param status  状态
+     * @return 影响行数
+     */
+    int updateStatus(Integer regId, String status);
+
+    /**
+     * 取消报名
+     *
+     * @param userId  用户 ID
+     * @param eventId 活动 ID
+     * @param reason  取消原因
+     * @return 影响行数
+     */
+    int cancel(Integer userId, Integer eventId, String reason);
 }

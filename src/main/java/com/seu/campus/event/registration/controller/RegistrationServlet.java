@@ -25,6 +25,10 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 活动报名管理
+ * 处理路径: /registration-action
+ * 请求参数:  action
+ *
  * @author XW
  */
 @WebServlet(name = "RegistrationServlet", value = "/registration-action")
@@ -34,7 +38,7 @@ public class RegistrationServlet extends HttpServlet {
     private final Gson gson = new Gson();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("UTF-8");
 
         // TODO: 在此处添加你的 doGet 逻辑
@@ -49,7 +53,7 @@ public class RegistrationServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("application/json;charset=utf-8");
 
@@ -59,6 +63,12 @@ public class RegistrationServlet extends HttpServlet {
         switch (action) {
             case "register":
                 doRegister(req, resp);
+                break;
+            case "audit":
+                doAudit(req, resp);
+                break;
+            case "cancel":
+                doCancel(req, resp);
                 break;
             default:
                 throw new RuntimeException("无效的请求参数");
@@ -128,18 +138,22 @@ public class RegistrationServlet extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         for (Registration reg : list) {
-            // 🟢 修复 Bug：使用 sdf 格式化日期
             String time = reg.getRegTime() != null ? sdf.format(reg.getRegTime()) : "";
 
-            String status = Objects.equals(reg.getStatus(), "1") ? "报名成功" : "待审核";
+            // 🔴 修改：判断字符串状态
+            String statusDesc = "待审核";
+            if ("approved".equals(reg.getStatus())) {
+                statusDesc = "报名成功";
+            } else if ("rejected".equals(reg.getStatus())) {
+                statusDesc = "已拒绝";
+            }
 
             out.println(
                     reg.getRegId() + "," +
                             safeCsv(reg.getContactName()) + "," +
-                            // 强制让 Excel 把电话当字符串处理（加制表符或单引号），防止科学计数法
                             "\t" + safeCsv(reg.getContactPhone()) + "," +
                             time + "," +
-                            status
+                            statusDesc
             );
         }
         out.flush();
@@ -188,6 +202,75 @@ public class RegistrationServlet extends HttpServlet {
             e.printStackTrace();
             result.put("status", "error");
             result.put("message", "系统错误: " + e.getMessage());
+        }
+        writeJson(resp, result);
+    }
+
+    private void doAudit(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+        // ... (Session 检查代码保持不变) ...
+
+        try {
+            String regIds = req.getParameter("regIds");
+            // 前端还是传 1 或 2，我们在这里转义
+            int statusInt = Integer.parseInt(req.getParameter("status"));
+
+            // 🔴 核心修改：数字转字符串
+            String statusStr = "pending";
+            if (statusInt == 1) {
+                statusStr = "approved";
+            }
+            if (statusInt == 2) {
+                statusStr = "rejected";
+            }
+
+            String msg = registrationService.audit(regIds, statusStr);
+
+            if ("SUCCESS".equals(msg)) {
+                result.put("status", "success");
+                result.put("message", "操作成功");
+            } else {
+                result.put("status", "fail");
+                result.put("message", msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "参数错误");
+        }
+        writeJson(resp, result);
+    }
+
+    private void doCancel(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Map<String, Object> result = new HashMap<>();
+
+        HttpSession session = req.getSession(false);
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        if (currentUser == null) {
+            result.put("status", "fail");
+            result.put("message", "未登录");
+            writeJson(resp, result);
+            return;
+        }
+
+        try {
+            Integer eventId = Integer.parseInt(req.getParameter("eventId"));
+            String reason = req.getParameter("reason");
+
+            String msg = registrationService.cancel(currentUser.getUserId(), eventId, reason);
+
+            if ("SUCCESS".equals(msg)) {
+                result.put("status", "success");
+                result.put("message", "报名已取消");
+            } else {
+                result.put("status", "fail");
+                result.put("message", msg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "参数错误");
         }
         writeJson(resp, result);
     }
