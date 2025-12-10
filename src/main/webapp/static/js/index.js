@@ -161,7 +161,6 @@ function loadEventList(params = {}) {
                 const emptyText = isFilterMode
                     ? '没有找到符合条件的活动，试着调整一下筛选条件？'
                     : '暂无活动信息';
-
                 container.html(`
                     <div class="col-span-full text-center py-16">
                         <div class="text-6xl mb-4">🍃</div>
@@ -403,6 +402,76 @@ function applyFilter() {
 
     toggleFilterModal();
     loadEventList(params);
+}
+
+// ==========================================
+// ➕ 新增：按钮点击与搜索交互逻辑
+// ==========================================
+
+/**
+ * 🔍 搜索框查询
+ * 对应 HTML: onkeypress="if(event.keyCode===13) filterByKeyword(this.value)"
+ */
+function filterByKeyword(value) {
+    // 1. 获取输入框的值 (去除首尾空格)
+    const keyword = value ? value.trim() : "";
+
+    // 2. 调用现有的加载函数 (它会发 AJAX 给后端)
+    // 后端 EventServlet 会接收 keyword 参数并拼接 SQL LIKE %keyword%
+    loadEventList({ keyword: keyword });
+
+    // 3. 给用户一个反馈
+    if (keyword) {
+        showToast(`🔍 正在搜索：${keyword}`, "info");
+    }
+}
+
+/**
+ * 🏷️ 分类按钮点击
+ * 对应 HTML: onclick="filterByCategory('文艺汇演')"
+ */
+function filterByCategory(categoryName) {
+    loadEventList({ category: categoryName });
+    updateCategoryButtonStyle(categoryName);
+}
+
+/**
+ * 🎨 辅助函数：专门负责切换按钮颜色
+ * (这样写是为了让逻辑更清晰)
+ */
+function updateCategoryButtonStyle(targetCategory) {
+    // 定义两种样式集合 (基于你的 HTML 和 Tailwind 类名)
+    // 🔵 选中态：蓝色背景、白字
+    const activeClasses = "bg-blue-600 text-white shadow-sm shadow-blue-200 border-transparent";
+    // ⚪️ 未选中态：白色背景、灰字、带边框
+    const inactiveClasses = "bg-white text-gray-600 border-gray-200 hover:text-blue-600 hover:border-blue-200";
+
+    // 1. 先把所有按钮都重置为“未选中”
+    $('.category-btn').removeClass(activeClasses).addClass(inactiveClasses);
+
+    // 2. 找到当前被点击的按钮，设为“选中”
+    // 💡 技巧：因为你的HTML里没写 data-category，我们用 jQuery 的 filter 功能
+    // 通过匹配 onclick 属性里的文字来找到对应的按钮
+    let $targetBtn;
+
+    if (!targetCategory) {
+        // 如果是“全部”，找 data-category="" 或者 onclick 包含 '' 的
+        $targetBtn = $('.category-btn[data-category=""]');
+        if ($targetBtn.length === 0) {
+            // 备用方案：找 onclick 里包含 "''" 的
+            $targetBtn = $('.category-btn').filter((i, el) => $(el).attr('onclick').indexOf("''") !== -1);
+        }
+    } else {
+        // 找 onclick 属性中包含 '分类名' 的按钮
+        $targetBtn = $('.category-btn').filter(function() {
+            // 获取这个按钮的 onclick 属性内容，比如 "filterByCategory('文艺汇演')"
+            const onClickStr = $(this).attr('onclick');
+            return onClickStr && onClickStr.indexOf(`'${targetCategory}'`) !== -1;
+        });
+    }
+
+    // 3. 高亮找到的按钮
+    $targetBtn.removeClass(inactiveClasses).addClass(activeClasses);
 }
 
 function resetFilter() {

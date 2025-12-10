@@ -3,76 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>校园活动报名平台 - 首页</title>
+    <title>校园活动报名平台</title>
     <link rel="icon" type="image/png" href="static/images/my_icon.ico">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="static/js/libs/jquery.min.js"></script>
-    <link rel="stylesheet" href="static/css/index.css">
+    <!-- FontAwesome 图标库 (为了那个筛选图标) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- 引入自定义样式 (可选，如果以后有特殊样式) -->
     <link rel="stylesheet" href="static/css/common.css">
+    <link rel="stylesheet" href="static/css/index.css">
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-gray-50 font-sans text-gray-700">
 
-<header class="nav-glass fixed w-full top-0 z-50 shadow-sm transition-all duration-300" id="navbar">
-    <div class="container mx-auto px-6 h-[60px] flex items-center justify-between relative">
+<!-- 1. 顶部导航栏 -->
+<header class="bg-white border-b border-gray-100 sticky top-0 z-50">
+    <div class="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-2 group">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-sm group-hover:scale-105 transition-transform">
+                校
+            </div>
+            <span class="font-bold text-xl text-gray-800 tracking-tight group-hover:text-blue-600 transition-colors">活动报名平台</span>
+        </a>
 
-        <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">校</div>
-            <span class="text-xl font-bold text-gray-700 tracking-wide">校园活动平台</span>
-        </div>
-
-        <nav class="hidden md:flex space-x-8 absolute left-1/2 transform -translate-x-1/2">
-            <a href="index.html" class="text-blue-600 font-medium border-b-2 border-blue-600">首页</a>
-            <a href="#" class="text-gray-600 hover:text-blue-500 transition">活动列表</a>
-            <a href="#" class="text-gray-600 hover:text-blue-500 transition">活动分类</a>
-            <a href="#" class="text-gray-600 hover:text-blue-500 transition">关于我们</a>
-        </nav>
-
-        <div id="user-area" class="flex items-center space-x-4">
+        <!-- 右侧用户区 (JS 动态渲染) -->
+        <div id="user-area" class="flex items-center gap-4">
+            <!-- 未登录状态 -->
             <a href="login.html"
-               class="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-full transition shadow-md">
-                登录 / 注册
+               class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">登录</a>
+            <a href="login.html?mode=register"
+               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-full shadow-sm hover:shadow-md transition-all transform active:scale-95">
+                注册账号
             </a>
         </div>
     </div>
 </header>
 
-<div class="h-[60px]"></div>
+<!-- 2. 核心区域：搜索与分类 (新版) -->
+<div class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="container mx-auto px-4 md:px-6 py-6">
 
-<main class="flex-grow container mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">探索精彩活动</h1>
+                <p class="text-gray-500 text-sm mt-1">发现属于你的校园生活</p>
+            </div>
 
-    <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-4">校园活动概览</h2>
+            <!-- 搜索框 -->
+            <div class="relative w-full md:w-96 group">
+                <input type="text" id="quick-search-input" placeholder="搜索活动名称、地点..."
+                       class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-gray-200 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                       onkeypress="if(event.keyCode===13) filterByKeyword(this.value)">
+                <i class="fa-solid fa-search absolute left-3.5 top-3 text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+            </div>
+        </div>
 
-        <button id="filter-toggle-btn"
-                onclick="toggleFilterModal()"
-                class="flex items-center gap-2 text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-600 transition-colors duration-200 px-4 py-2 rounded-full font-medium shadow-md">
+        <!-- 分类标签栏 (可横向滚动) -->
+        <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2" id="category-bar">
+            <!-- '全部' 按钮，默认激活状态 (bg-blue-600 text-white) -->
+            <button onclick="filterByCategory('')" data-category=""
+                    class="category-btn active flex-shrink-0 px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-sm shadow-blue-200 transition-transform active:scale-95 border border-transparent">
+                全部
+            </button>
 
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <span>筛选</span>
-        </button>
+            <button onclick="filterByCategory('文艺汇演')"
+                    class="category-btn flex-shrink-0 px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 text-sm font-medium rounded-full transition-colors">
+                🎵 文艺汇演
+            </button>
+
+            <button onclick="filterByCategory('体育竞技')"
+                    class="category-btn flex-shrink-0 px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 text-sm font-medium rounded-full transition-colors">
+                🏀 体育竞技
+            </button>
+
+            <button onclick="filterByCategory('学术讲座')"
+                    class="category-btn flex-shrink-0 px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 text-sm font-medium rounded-full transition-colors">
+                📚 学术讲座
+            </button>
+
+            <button onclick="filterByCategory('社团活动')"
+                    class="category-btn flex-shrink-0 px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 text-sm font-medium rounded-full transition-colors">
+                🚩 社团活动
+            </button>
+
+            <button onclick="filterByCategory('公益志愿')"
+                    class="category-btn flex-shrink-0 px-4 py-1.5 bg-white border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 text-sm font-medium rounded-full transition-colors">
+                ❤️ 公益志愿
+            </button>
+
+            <div class="h-6 w-px bg-gray-200 mx-2"></div>
+
+            <button onclick="toggleFilterModal()"
+                    class="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 text-gray-500 hover:text-gray-800 text-sm font-medium transition-colors">
+                <i class="fa-solid fa-filter text-xs"></i> 更多筛选
+            </button>
+        </div>
     </div>
+</div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="event-container">
+<!-- 3. 活动列表区域 -->
+<main class="container mx-auto px-4 md:px-6 py-8 min-h-[500px]">
+    <!-- 活动卡片容器 -->
+    <div id="event-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- JS 将在这里动态渲染活动卡片 -->
+        <p class="text-center text-gray-400 col-span-full py-20">正在加载精彩活动...</p>
     </div>
 </main>
 
-<footer class="bg-gray-800 text-gray-300 mt-auto">
-    <div class="container mx-auto px-6 py-8 text-center text-sm">
-        <p>&copy; 2025 Campus Event Platform. All rights reserved.</p>
+<!-- 4. 页脚 -->
+<footer class="bg-white border-t border-gray-100 py-8 mt-12">
+    <div class="container mx-auto px-4 text-center">
+        <p class="text-gray-400 text-sm">© 2024 校园活动报名平台 | 探索 · 参与 · 成长</p>
     </div>
 </footer>
 
+<!-- ================= 弹窗组件区域 ================= -->
+
+<!-- 报名弹窗 -->
 <div id="reg-modal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeRegModal()"></div>
-
+    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeRegModal()"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 transform transition-all scale-100">
-
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-gray-800">📝 填写报名信息</h3>
+            <h3 class="text-xl font-bold text-gray-800">📝 立即报名</h3>
             <button onclick="closeRegModal()"
-                    class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition">
+                    class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M6 18L18 6M6 6l12 12"></path>
@@ -80,111 +134,106 @@
             </button>
         </div>
 
-        <form id="reg-form" class="space-y-4">
-            <input type="hidden" id="reg-eventId">
-
+        <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">您的姓名 <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">真实姓名</label>
                 <input type="text" id="reg-name"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                       placeholder="请输入真实姓名">
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                       placeholder="请输入你的姓名">
             </div>
-
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">联系电话 <span class="text-red-500">*</span></label>
-                <input type="tel" id="reg-phone"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+                <input type="text" id="reg-phone"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                        placeholder="用于接收通知">
             </div>
 
-            <div class="text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
-                ℹ️ 报名后需等待管理员审核，审核结果可在“我的报名”中查看。
+            <div class="bg-blue-50 p-3 rounded-lg flex items-start gap-2 text-xs text-blue-700 mt-2">
+                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p>提交报名即表示你承诺准时参加活动。如需取消，请在活动开始前到个人中心操作。</p>
             </div>
 
-            <div class="pt-2">
-                <button type="button" onclick="submitRegistration()"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-md hover:shadow-lg transition active:scale-95">
-                    确认提交
-                </button>
-            </div>
-        </form>
+            <button onclick="submitRegistration()"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95 mt-4">
+                确认提交
+            </button>
+        </div>
+        <input type="hidden" id="reg-eventId">
     </div>
 </div>
 
-<div id="filter-modal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<!-- 更多筛选弹窗 -->
+<div id="filter-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true">
+    <div id="filter-backdrop" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity opacity-0"
+         onclick="toggleFilterModal()"></div>
 
-    <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity opacity-0" id="filter-backdrop" onclick="toggleFilterModal()"></div>
+    <div id="filter-panel"
+         class="absolute inset-x-0 top-0 md:top-20 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 w-full md:w-[600px] bg-white md:rounded-2xl shadow-2xl transform transition-all scale-95 opacity-0 duration-300 flex flex-col max-h-[90vh]">
 
-    <div class="fixed inset-0 z-10 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-blue-500"></i> 高级筛选
+            </h3>
+            <button onclick="toggleFilterModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
 
-            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg scale-95 opacity-0" id="filter-panel">
-
-                <div class="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b border-blue-100 flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <span class="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                        </span>
-                        活动筛选条件
-                    </h3>
-                    <button type="button" onclick="toggleFilterModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+        <div class="p-6 space-y-5 overflow-y-auto">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">关键词</label>
+                    <input type="text" id="f-keyword" placeholder="活动名称 / 组织者"
+                           class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-
-                <div class="px-6 py-6 space-y-5">
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">🔍 关键字</label>
-                        <input type="text" id="f-keyword" placeholder="搜索活动名称、描述..."
-                               class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm placeholder-gray-400">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">🏷️ 类别</label>
-                            <select id="f-category" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all outline-none text-sm text-gray-600 appearance-none">
-                                <option value="">全部类别</option>
-                                <option value="学术讲座">学术讲座</option>
-                                <option value="体育竞技">体育竞技</option>
-                                <option value="文艺汇演">文艺汇演</option>
-                                <option value="社团活动">社团活动</option>
-                                <option value="公益志愿">公益志愿</option>
-                                <option value="其他">其他</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">📍 地点</label>
-                            <input type="text" id="f-location" placeholder="例如: 大活"
-                                   class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all outline-none text-sm">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">📅 时间范围</label>
-                        <div class="flex items-center gap-3">
-                            <input type="date" id="f-startDate" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
-                            <span class="text-gray-400">-</span>
-                            <input type="date" id="f-endDate" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">活动类型</label>
+                    <select id="f-category"
+                            class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">全部类型</option>
+                        <option value="文艺汇演">文艺汇演</option>
+                        <option value="体育竞技">体育竞技</option>
+                        <option value="学术讲座">学术讲座</option>
+                        <option value="志愿服务">志愿服务</option>
+                        <option value="其他活动">其他活动</option>
+                    </select>
                 </div>
-
-                <div class="bg-gray-50 px-6 py-4 flex flex-row-reverse gap-3 border-t border-gray-100">
-                    <button type="button" onclick="applyFilter()"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-500 hover:shadow-lg transition-all active:scale-95">
-                        应用筛选
-                    </button>
-                    <button type="button" onclick="resetFilter()"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all">
-                        重置条件
-                    </button>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">举办地点</label>
+                    <input type="text" id="f-location" placeholder="例如: 大礼堂"
+                           class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">开始日期</label>
+                    <input type="date" id="f-startDate"
+                           class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">结束日期</label>
+                    <input type="date" id="f-endDate"
+                           class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
         </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center rounded-b-2xl">
+            <button onclick="resetFilter()" class="text-sm text-gray-500 hover:text-gray-800 font-medium">清空条件
+            </button>
+            <button onclick="applyFilter()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-md shadow-blue-200 transition-transform active:scale-95">
+                应用筛选
+            </button>
+        </div>
     </div>
 </div>
-</body>
-<script src="static/js/index.js"></script>
+
+<!-- JS 脚本 -->
+<script src="static/js/libs/jquery.min.js"></script>
 <script src="static/js/common.js"></script>
+<script src="static/js/index.js"></script>
+
+</body>
 </html>

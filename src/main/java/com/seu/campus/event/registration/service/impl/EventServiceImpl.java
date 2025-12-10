@@ -27,7 +27,19 @@ public class EventServiceImpl implements EventService {
         if (event.getTitle() == null || event.getTitle().trim().isEmpty()) {
             return "活动标题不能为空";
         }
-        // 2. 时间校验 (逻辑：结束时间必须晚于开始时间)
+
+        // <-- 修改在这里：主动清洗数据 (Trim)，防止数据库存入多余空格
+        if (event.getTitle() != null) {
+            event.setTitle(event.getTitle().trim());
+        }
+        if (event.getCategory() != null) {
+            event.setCategory(event.getCategory().trim());
+        }
+        if (event.getLocation() != null) {
+            event.setLocation(event.getLocation().trim());
+        }
+
+        // 2. 时间校验
         if (event.getStartTime() != null && event.getEndTime() != null) {
             if (event.getEndTime().before(event.getStartTime())) {
                 return "结束时间不能早于开始时间";
@@ -37,13 +49,9 @@ public class EventServiceImpl implements EventService {
         // 3. 设置默认状态
         event.setIsActive(1);
 
-        // 4. 保存到数据库
+        // 4. 保存
         int rows = eventMapper.save(event);
-        if (rows > 0) {
-            return "SUCCESS";
-        } else {
-            return "发布失败：数据库保存错误";
-        }
+        return rows > 0 ? "SUCCESS" : "发布失败：数据库保存错误";
     }
 
     @Override

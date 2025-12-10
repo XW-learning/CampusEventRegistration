@@ -4,6 +4,7 @@ import com.seu.campus.event.registration.mapper.EventMapper;
 import com.seu.campus.event.registration.model.Event;
 import com.seu.campus.event.registration.util.DBUtil;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,21 +60,26 @@ public class EventMapperImpl implements EventMapper {
             params.add("%" + keyword.trim() + "%");
             params.add("%" + keyword.trim() + "%");
         }
+
         if (category != null && !category.trim().isEmpty()) {
+            System.out.println("11111活动类型: " + category);
             sql.append(" AND category = ?");
             params.add(category.trim());
         }
+
         if (location != null && !location.trim().isEmpty()) {
             sql.append(" AND location LIKE ?");
             params.add("%" + location.trim() + "%");
         }
+
         if (startDate != null) {
             sql.append(" AND start_time >= ?");
-            params.add(startDate);
+            params.add(new Timestamp(startDate.getTime()));
         }
+
         if (endDate != null) {
             sql.append(" AND start_time <= ?");
-            params.add(endDate);
+            params.add(new Timestamp(endDate.getTime()));
         }
         sql.append(" ORDER BY start_time DESC");
         return DBUtil.query(sql.toString(), Event.class, params.toArray());

@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * JDBC 通用工具类
  * 功能：封装数据库连接、资源关闭、通用增删改、通用查询
+ * @author XW
  */
 public class DBUtil {
 
@@ -16,7 +17,7 @@ public class DBUtil {
     private static final String DB_NAME = "db_campus_event";
     private static final String URL = "jdbc:mysql://localhost:3306/"
             + DB_NAME +
-            "?allowPublicKeyRetrieval=true&useSSL=false";
+            "?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai";
 
     // 2. 数据库用户名
     private static final String USER = "root";
