@@ -8,6 +8,11 @@ const EVENT_API_URL = 'event-action';
 const REG_API_URL = 'registration-action';
 // 全局变量：记录当前登录用户
 let currentUser = null;
+// [新增] 全局变量：存储当前的筛选条件和页码
+let currentParams = {
+    page: 1,
+    pageSize: 12
+};
 
 $(document).ready(function () {
     // 1. 检查登录状态
@@ -135,17 +140,29 @@ function doLogout() {
  */
 function loadEventList(params = {}) {
     const container = $('#event-container');
+    const pagination = $('#pagination-container');
 
-    // 如果是筛选模式，给个不同的提示
-    const isFilterMode = Object.keys(params).length > 0;
-    const loadingText = isFilterMode ? '🔍 正在筛选活动...' : '正在加载精彩活动...';
+    // 1. 更新全局参数
+    // 如果传入了新的筛选条件 (比如点击了搜索或分类)，则重置页码为 1
+    if (Object.keys(params).length > 0 && !params.page) {
+        currentParams = { ...currentParams, ...params, page: 1 };
+    } else if (params.page) {
+        // 如果只是翻页
+        currentParams.page = params.page;
+    }
+    // 如果 params 为空 (比如重置)，则保持 currentParams 里的筛选清空，但保留 pageSize
+    if (Object.keys(params).length === 0 && arguments.length === 1) { // 显式调用空参数
+        // 这里的逻辑视你的 resetFilter 实现而定，下面 resetFilter 会传空对象
+    }
 
-    container.html(`<p class="text-gray-500 text-center col-span-full py-10">${loadingText}</p>`);
+    // 2. 显示加载状态
+    container.html('<p class="text-gray-500 text-center col-span-full py-10">正在加载...</p>');
+    pagination.empty();
 
-    // 合并基础参数 action='list' 和传入的筛选 params
+    // 3. 发起请求
     const requestData = {
         action: 'list',
-        ...params
+        ...currentParams // 发送所有当前参数 (含 page)
     };
 
     $.ajax({
@@ -154,26 +171,86 @@ function loadEventList(params = {}) {
         data: requestData,
         dataType: 'json',
         success: function (res) {
-            if (res.status === 'success' && res.data && res.data.length > 0) {
-                renderEvents(res.data);
+            if (res.status === 'success' && res.data) {
+                const pageBean = res.data;
+
+                // 渲染列表 (注意：现在数据在 pageBean.list 里)
+                if (pageBean.list && pageBean.list.length > 0) {
+                    renderEvents(pageBean.list);
+                    // 渲染分页条
+                    renderPagination(pageBean);
+                } else {
+                    renderNoData(container);
+                }
             } else {
-                // 如果没查到数据
-                const emptyText = isFilterMode
-                    ? '没有找到符合条件的活动，试着调整一下筛选条件？'
-                    : '暂无活动信息';
-                container.html(`
-                    <div class="col-span-full text-center py-16">
-                        <div class="text-6xl mb-4">🍃</div>
-                        <p class="text-gray-500 text-lg">${emptyText}</p>
-                        ${isFilterMode ? '<button onclick="resetFilter()" class="mt-4 text-blue-600 hover:underline">清空筛选条件</button>' : ''}
-                    </div>
-                `);
+                renderNoData(container);
             }
         },
         error: function () {
             container.html('<p class="text-red-500 text-center col-span-full py-10">加载失败，请检查网络</p>');
         }
     });
+}
+
+// 辅助：无数据展示
+function renderNoData(container) {
+    container.html(`
+        <div class="col-span-full text-center py-16">
+            <div class="text-6xl mb-4">🍃</div>
+            <p class="text-gray-500 text-lg">暂无活动信息</p>
+        </div>
+    `);
+    $('#pagination-container').empty();
+}
+
+/**
+ * [新增] 渲染分页条
+ * @param {Object} pageBean - 后端返回的分页对象
+ */
+function renderPagination(pageBean) {
+    const container = $('#pagination-container');
+    container.empty();
+
+    const { currentPage, totalPage } = pageBean;
+
+    // 如果只有1页，就不显示分页条
+    if (totalPage <= 1) return;
+
+    let html = '';
+
+    // 上一页
+    const prevDisabled = currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600 hover:text-white cursor-pointer';
+    const prevOnClick = currentPage === 1 ? '' : `onclick="changePage(${currentPage - 1})"`;
+    html += `<button ${prevOnClick} class="px-3 py-1 bg-white border border-gray-200 rounded-md text-sm text-gray-600 transition-colors ${prevDisabled}">上一页</button>`;
+
+    // 页码 (简单实现：显示所有页码，或者你可以优化只显示当前页附近的页码)
+    for (let i = 1; i <= totalPage; i++) {
+        if (i === currentPage) {
+            // 当前页：蓝色高亮
+            html += `<button class="px-3 py-1 bg-blue-600 border border-blue-600 rounded-md text-sm text-white font-bold cursor-default">${i}</button>`;
+        } else {
+            // 其他页
+            html += `<button onclick="changePage(${i})" class="px-3 py-1 bg-white border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">${i}</button>`;
+        }
+    }
+
+    // 下一页
+    const nextDisabled = currentPage === totalPage ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600 hover:text-white cursor-pointer';
+    const nextOnClick = currentPage === totalPage ? '' : `onclick="changePage(${currentPage + 1})"`;
+    html += `<button ${nextOnClick} class="px-3 py-1 bg-white border border-gray-200 rounded-md text-sm text-gray-600 transition-colors ${nextDisabled}">下一页</button>`;
+
+    container.html(html);
+}
+
+/**
+ * [新增] 切换页码
+ */
+function changePage(page) {
+    loadEventList({ page: page });
+    // 滚回到列表顶部，提升体验
+    $('html, body').animate({
+        scrollTop: $("#event-container").offset().top - 100
+    }, 300);
 }
 
 /**
@@ -474,14 +551,15 @@ function updateCategoryButtonStyle(targetCategory) {
     $targetBtn.removeClass(inactiveClasses).addClass(activeClasses);
 }
 
+// 修改 resetFilter，清空参数时也要重置 currentParams
 function resetFilter() {
-    // 1. 清空输入框 UI
     $('#f-keyword').val('');
     $('#f-category').val('');
     $('#f-location').val('');
     $('#f-startDate').val('');
     $('#f-endDate').val('');
 
-    // 2. 重新加载所有数据 (传空对象)
-    loadEventList({});
+    // 重置全局参数
+    currentParams = { page: 1, pageSize: 12 };
+    loadEventList();
 }

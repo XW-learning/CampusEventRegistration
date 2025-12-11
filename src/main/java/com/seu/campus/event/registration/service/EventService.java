@@ -2,6 +2,7 @@ package com.seu.campus.event.registration.service;
 
 
 import com.seu.campus.event.registration.model.Event;
+import com.seu.campus.event.registration.model.PageBean;
 
 import java.util.List;
 
@@ -34,16 +35,12 @@ public interface EventService {
     List<Event> findMyEvents(Integer userId, String type);
 
     /**
-     * 搜索活动
+     * 分页搜索活动
      *
-     * @param keyword      关键词
-     * @param category     活动类别
-     * @param location     活动地点
-     * @param startDateStr 开始时间
-     * @param endDateStr   结束时间
-     * @return 活动列表
+     * @param page     当前页码
+     * @param pageSize 每页显示数量
      */
-    List<Event> searchEvents(String keyword, String category, String location, String startDateStr, String endDateStr);
+    PageBean<Event> searchEvents(String keyword, String category, String location, String startDateStr, String endDateStr, int page, int pageSize);
 
     /**
      * 设置签到码
@@ -54,4 +51,6 @@ public interface EventService {
      * @return 状态信息
      */
     String setCheckinCode(Integer userId, Integer eventId, String code);
+
+
 }

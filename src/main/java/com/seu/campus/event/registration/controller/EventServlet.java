@@ -3,6 +3,7 @@ package com.seu.campus.event.registration.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.seu.campus.event.registration.model.Event;
+import com.seu.campus.event.registration.model.PageBean;
 import com.seu.campus.event.registration.model.User;
 import com.seu.campus.event.registration.service.EventService;
 import com.seu.campus.event.registration.service.impl.EventServiceImpl;
@@ -76,19 +77,31 @@ public class EventServlet extends HttpServlet {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            // 1. 获取筛选参数 (如果没有传就是 null 或空字符串)
+            // 1. 获取筛选参数
             String keyword = req.getParameter("keyword");
             String category = req.getParameter("category");
             String location = req.getParameter("location");
             String startDate = req.getParameter("startDate");
             String endDate = req.getParameter("endDate");
 
-            // 2. 调用业务层 (统一走 search 逻辑，如果参数全空，search 方法内部逻辑也支持查所有)
-            List<Event> events = eventService.searchEvents(keyword, category, location, startDate, endDate);
+            // 2. 获取分页参数 (默认为第 1 页)
+            int page = 1;
+            String pageStr = req.getParameter("page");
+            if (pageStr != null && !pageStr.isEmpty()) {
+                try {
+                    page = Integer.parseInt(pageStr);
+                } catch (NumberFormatException e) {
+                    page = 1;
+                }
+            }
+            int pageSize = 12; // 固定每页 12 条
 
-            // 3. 封装结果
+            // 3. 调用业务层 (返回 PageBean)
+            PageBean<Event> pageBean = eventService.searchEvents(keyword, category, location, startDate, endDate, page, pageSize);
+
+            // 4. 封装结果
             result.put("status", "success");
-            result.put("data", events);
+            result.put("data", pageBean); // 注意：这里 data 以前是 List，现在变成了 Object (PageBean)
 
         } catch (Exception e) {
             e.printStackTrace();

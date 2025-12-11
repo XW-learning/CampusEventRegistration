@@ -52,24 +52,31 @@ public interface EventMapper {
     List<Event> findRegisteredByUserId(Integer userId);
 
     /**
-     * 多条件组合筛选活动
-     *
-     * @param keyword   关键字 (标题或详情)
-     * @param category  分类
-     * @param location  地点
-     * @param startDate 开始日期范围 - 起始
-     * @param endDate   开始日期范围 - 结束
-     * @return 符合条件的活动列表
-     */
-    List<Event> search(String keyword, String category, String location, Date startDate, Date endDate);
-
-    /**
      * 更新签到码
      *
      * @param eventId 活动 ID
      * @param code    签到码
-     * @return 影响行数
      */
-    int updateCheckinCode(Integer eventId, String code);
+    void updateCheckinCode(Integer eventId, String code);
+
+    /**
+     * 分页查询活动列表
+     *
+     * @param offset   偏移量 (从第几条开始)
+     * @param pageSize 每页条数
+     */
+    List<Event> searchByPage(String keyword, String category, String location, Date startDate, Date endDate, int offset, int pageSize);
+
+    /**
+     * 统计搜索结果数量
+     *
+     * @param keyword   关键词
+     * @param category  分类
+     * @param location  地点
+     * @param startDate 开始时间
+     * @param endDate   结束时间
+     * @return 搜索结果数量
+     */
+    int countSearch(String keyword, String category, String location, Date startDate, Date endDate);
 
 }

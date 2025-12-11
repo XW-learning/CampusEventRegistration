@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * JDBC 通用工具类
  * 功能：封装数据库连接、资源关闭、通用增删改、通用查询
+ *
  * @author XW
  */
 public class DBUtil {
@@ -187,6 +188,46 @@ public class DBUtil {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * 新增：通用统计查询方法 (SELECT count(*))
+     * 专门用于处理返回单行单列整数的 SQL，例如查询总记录数
+     *
+     * @param sql    SQL 语句
+     * @param params 参数
+     * @return 统计的数量
+     */
+    public static int queryCount(String sql, Object... params) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sql);
+
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    ps.setObject(i + 1, params[i]);
+                }
+            }
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                // 获取结果集第一列的值 (即 count(*) 的结果)
+                count = rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Count查询异常: " + sql);
+            e.printStackTrace();
+        } finally {
+            close(rs, ps, conn);
+        }
+        return count;
     }
 
     /**

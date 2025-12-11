@@ -51,44 +51,59 @@ public class EventMapperImpl implements EventMapper {
     }
 
     @Override
-    public List<Event> search(String keyword, String category, String location, Date startDate, Date endDate) {
+    public List<Event> searchByPage(String keyword, String category, String location, Date startDate, Date endDate, int offset, int pageSize) {
         StringBuilder sql = new StringBuilder("SELECT * FROM t_event WHERE is_active = 1");
         List<Object> params = new ArrayList<>();
 
+        buildSearchCondition(sql, params, keyword, category, location, startDate, endDate);
+
+        // 添加分页和排序
+        sql.append(" ORDER BY start_time DESC LIMIT ?, ?");
+        params.add(offset);
+        params.add(pageSize);
+
+        return DBUtil.query(sql.toString(), Event.class, params.toArray());
+    }
+
+    // 提取公共的查询条件构建逻辑
+    private void buildSearchCondition(StringBuilder sql, List<Object> params, String keyword, String category, String location, Date startDate, Date endDate) {
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append(" AND (title LIKE ? OR detail LIKE ?)");
             params.add("%" + keyword.trim() + "%");
             params.add("%" + keyword.trim() + "%");
         }
-
         if (category != null && !category.trim().isEmpty()) {
-            System.out.println("11111活动类型: " + category);
             sql.append(" AND category = ?");
             params.add(category.trim());
         }
-
         if (location != null && !location.trim().isEmpty()) {
             sql.append(" AND location LIKE ?");
             params.add("%" + location.trim() + "%");
         }
-
         if (startDate != null) {
             sql.append(" AND start_time >= ?");
             params.add(new Timestamp(startDate.getTime()));
         }
-
         if (endDate != null) {
             sql.append(" AND start_time <= ?");
             params.add(new Timestamp(endDate.getTime()));
         }
-        sql.append(" ORDER BY start_time DESC");
-        return DBUtil.query(sql.toString(), Event.class, params.toArray());
     }
 
     // 🟢 补全：设置签到码方法
     @Override
-    public int updateCheckinCode(Integer eventId, String code) {
+    public void updateCheckinCode(Integer eventId, String code) {
         String sql = "UPDATE t_event SET checkin_code = ? WHERE event_id = ?";
-        return DBUtil.update(sql, code, eventId);
+        DBUtil.update(sql, code, eventId);
+    }
+
+    @Override
+    public int countSearch(String keyword, String category, String location, Date startDate, Date endDate) {
+        StringBuilder sql = new StringBuilder("SELECT count(*) FROM t_event WHERE is_active = 1");
+        List<Object> params = new ArrayList<>();
+
+        buildSearchCondition(sql, params, keyword, category, location, startDate, endDate);
+
+        return DBUtil.queryCount(sql.toString(), params.toArray());
     }
 }

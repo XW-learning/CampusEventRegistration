@@ -3,6 +3,7 @@ package com.seu.campus.event.registration.service.impl;
 import com.seu.campus.event.registration.mapper.EventMapper;
 import com.seu.campus.event.registration.mapper.impl.EventMapperImpl;
 import com.seu.campus.event.registration.model.Event;
+import com.seu.campus.event.registration.model.PageBean;
 import com.seu.campus.event.registration.service.EventService;
 
 import java.text.SimpleDateFormat;
@@ -70,27 +71,33 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> searchEvents(String keyword, String category, String location, String startDateStr, String endDateStr) {
+    public PageBean<Event> searchEvents(String keyword, String category, String location, String startDateStr, String endDateStr, int page, int pageSize) {
         Date startDate = null;
         Date endDate = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         try {
-            // 处理日期：前端传的是 yyyy-MM-dd
             if (startDateStr != null && !startDateStr.isEmpty()) {
-                // 补全时间为当天的 00:00:00
                 startDate = sdf.parse(startDateStr + " 00:00:00");
             }
             if (endDateStr != null && !endDateStr.isEmpty()) {
-                // 补全时间为当天的 23:59:59，确保包含当天活动
                 endDate = sdf.parse(endDateStr + " 23:59:59");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // 日期格式错误时忽略日期条件，防止报错
         }
 
-        return eventMapper.search(keyword, category, location, startDate, endDate);
+        // 1. 计算偏移量
+        int offset = (page - 1) * pageSize;
+
+        // 2. 查询当前页数据
+        List<Event> list = eventMapper.searchByPage(keyword, category, location, startDate, endDate, offset, pageSize);
+
+        // 3. 查询总记录数
+        int totalCount = eventMapper.countSearch(keyword, category, location, startDate, endDate);
+
+        // 4. 封装 PageBean
+        return new PageBean<>(page, pageSize, totalCount, list);
     }
 
     @Override
