@@ -32,6 +32,9 @@ public class EventServlet extends HttpServlet {
     // 修改 Gson 的初始化，设置日期格式，否则传给前端的是怪异的字符串
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
+    public EventServlet() throws IOException {
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("UTF-8");
@@ -66,6 +69,7 @@ public class EventServlet extends HttpServlet {
                 break;
             case "set_checkin_code":
                 doSetCheckinCode(req, resp);
+                break;
             default:
                 writeJson(resp, Map.of("status", "error", "message", "未知指令"));
                 break;
@@ -94,14 +98,14 @@ public class EventServlet extends HttpServlet {
                     page = 1;
                 }
             }
-            int pageSize = 12; // 固定每页 12 条
+            int pageSize = 12;
 
             // 3. 调用业务层 (返回 PageBean)
             PageBean<Event> pageBean = eventService.searchEvents(keyword, category, location, startDate, endDate, page, pageSize);
 
             // 4. 封装结果
             result.put("status", "success");
-            result.put("data", pageBean); // 注意：这里 data 以前是 List，现在变成了 Object (PageBean)
+            result.put("data", pageBean);
 
         } catch (Exception e) {
             e.printStackTrace();

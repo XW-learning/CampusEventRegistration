@@ -1,73 +1,89 @@
 package com.seu.campus.event.registration.service.impl;
 
 import com.seu.campus.event.registration.mapper.EventMapper;
-import com.seu.campus.event.registration.mapper.impl.EventMapperImpl;
 import com.seu.campus.event.registration.model.Event;
 import com.seu.campus.event.registration.model.PageBean;
 import com.seu.campus.event.registration.service.EventService;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 /**
- * 活动服务实现类
- * 主要负责处理活动相关的业务逻辑，包括：
- * 1. 发布新活动（包含数据校验和保存）
- * 2. 查询所有有效的活动列表
+ * 活动服务实现类（修正版）
+ * 修复了 SqlSession 长期持有导致的缓存不刷新和线程安全问题
  *
  * @author XW
  */
-
 public class EventServiceImpl implements EventService {
-    private final EventMapper eventMapper = new EventMapperImpl();
+
+    // 1. Factory 是线程安全的，全局只需要一份
+    private static final SqlSessionFactory SQL_SESSION_FACTORY;
+
+    static {
+        try {
+            String resource = "mybatis-config.xml";
+            InputStream inputStream = Resources.getResourceAsStream(resource);
+            SQL_SESSION_FACTORY = new SqlSessionFactoryBuilder().build(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("初始化 MyBatis 失败", e);
+        }
+    }
 
     @Override
     public String publishEvent(Event event) {
-        // 1. 基础校验
+        // 校验逻辑
         if (event.getTitle() == null || event.getTitle().trim().isEmpty()) {
             return "活动标题不能为空";
         }
-
-        // <-- 修改在这里：主动清洗数据 (Trim)，防止数据库存入多余空格
-        if (event.getTitle() != null) {
-            event.setTitle(event.getTitle().trim());
-        }
+        event.setTitle(event.getTitle().trim());
         if (event.getCategory() != null) {
             event.setCategory(event.getCategory().trim());
         }
         if (event.getLocation() != null) {
             event.setLocation(event.getLocation().trim());
         }
-
-        // 2. 时间校验
-        if (event.getStartTime() != null && event.getEndTime() != null) {
-            if (event.getEndTime().before(event.getStartTime())) {
-                return "结束时间不能早于开始时间";
-            }
+        if (event.getStartTime() != null && event.getEndTime() != null && event.getEndTime().before(event.getStartTime())) {
+            return "结束时间不能早于开始时间";
         }
-
-        // 3. 设置默认状态
         event.setIsActive(1);
 
-        // 4. 保存
-        int rows = eventMapper.save(event);
-        return rows > 0 ? "SUCCESS" : "发布失败：数据库保存错误";
+        // 2. 在方法内部获取 Session，自动关闭 (try-with-resources)
+        try (SqlSession session = SQL_SESSION_FACTORY.openSession()) {
+            EventMapper mapper = session.getMapper(EventMapper.class);
+            int rows = mapper.save(event);
+            session.commit();
+            return rows > 0 ? "SUCCESS" : "发布失败";
+        }
     }
 
     @Override
     public List<Event> findAllActiveEvents() {
-        return eventMapper.findAllActive();
+        try (SqlSession session = SQL_SESSION_FACTORY.openSession()) {
+            EventMapper mapper = session.getMapper(EventMapper.class);
+            return mapper.findAllActive();
+        }
     }
 
     @Override
     public List<Event> findMyEvents(Integer userId, String type) {
-        if ("published".equals(type)) {
-            return eventMapper.findByPublisherId(userId);
-        } else if ("joined".equals(type)) {
-            return eventMapper.findRegisteredByUserId(userId);
+        try (SqlSession session = SQL_SESSION_FACTORY.openSession()) {
+            EventMapper mapper = session.getMapper(EventMapper.class);
+            if ("published".equals(type)) {
+                return mapper.findByPublisherId(userId);
+            } else if ("joined".equals(type)) {
+                // 这里每次都会打开新 Session，强制查库，不会遭遇一级缓存不刷新的问题
+                return mapper.findRegisteredByUserId(userId);
+            }
+            return Collections.emptyList();
         }
-        return List.of();
     }
 
     @Override
@@ -75,7 +91,6 @@ public class EventServiceImpl implements EventService {
         Date startDate = null;
         Date endDate = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
         try {
             if (startDateStr != null && !startDateStr.isEmpty()) {
                 startDate = sdf.parse(startDateStr + " 00:00:00");
@@ -87,28 +102,27 @@ public class EventServiceImpl implements EventService {
             e.printStackTrace();
         }
 
-        // 1. 计算偏移量
         int offset = (page - 1) * pageSize;
 
-        // 2. 查询当前页数据
-        List<Event> list = eventMapper.searchByPage(keyword, category, location, startDate, endDate, offset, pageSize);
-
-        // 3. 查询总记录数
-        int totalCount = eventMapper.countSearch(keyword, category, location, startDate, endDate);
-
-        // 4. 封装 PageBean
-        return new PageBean<>(page, pageSize, totalCount, list);
+        try (SqlSession session = SQL_SESSION_FACTORY.openSession()) {
+            EventMapper mapper = session.getMapper(EventMapper.class);
+            List<Event> list = mapper.searchByPage(keyword, category, location, startDate, endDate, offset, pageSize);
+            int totalCount = mapper.countSearch(keyword, category, location, startDate, endDate);
+            return new PageBean<>(page, pageSize, totalCount, list);
+        }
     }
 
     @Override
     public String setCheckinCode(Integer userId, Integer eventId, String code) {
-        Event event = eventMapper.findById(eventId);
-        if (event == null || !event.getPublisherId().equals(userId)) {
-            return "权限不足";
+        try (SqlSession session = SQL_SESSION_FACTORY.openSession()) {
+            EventMapper mapper = session.getMapper(EventMapper.class);
+            Event event = mapper.findById(eventId);
+            if (event == null || !event.getPublisherId().equals(userId)) {
+                return "权限不足";
+            }
+            mapper.updateCheckinCode(eventId, code);
+            session.commit(); // 提交事务
+            return "SUCCESS";
         }
-
-        eventMapper.updateCheckinCode(eventId, code);
-        return "SUCCESS";
     }
 }
-

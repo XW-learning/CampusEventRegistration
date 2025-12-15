@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.seu.campus.event.registration.mapper.EventMapper">
+
+    <resultMap id="EventResultMap"
+               type="com.seu.campus.event.registration.model.Event">
+        <id property="eventId" column="event_id"/>
+        <result property="title" column="title"/>
+        <result property="category" column="category"/>
+        <result property="location" column="location"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="regDeadline" column="reg_deadline"/>
+        <result property="detail" column="detail"/>
+        <result property="publisherId" column="publisher_id"/>
+        <result property="isActive" column="is_active"/>
+        <result property="checkinCode" column="checkin_code"/>
+        <result property="registrationStatus" column="registration_status"/>
+        <result property="checkinStatus" column="checkin_status"/>
+    </resultMap>
+
+    <!--新增活动-->
+    <insert id="save"
+            parameterType="com.seu.campus.event.registration.model.Event"
+            useGeneratedKeys="true"
+            keyProperty="eventId">
+        INSERT INTO t_event (title,
+                             category,
+                             location,
+                             start_time,
+                             end_time,
+                             reg_deadline,
+                             detail,
+                             publisher_id,
+                             is_active,
+                             checkin_code)
+        VALUES (#{title},
+                #{category},
+                #{location},
+                #{startTime},
+                #{endTime},
+                #{regDeadline},
+                #{detail},
+                #{publisherId},
+                #{isActive},
+                #{checkinCode})
+    </insert>
+    <!--查找全部活动-->
+    <select id="findAllActive" resultMap="EventResultMap">
+        SELECT event_id,
+               title,
+               category,
+               location,
+               start_time,
+               end_time,
+               reg_deadline,
+               detail,
+               publisher_id,
+               is_active,
+               checkin_code
+        FROM t_event
+        WHERE is_active = 1
+        ORDER BY start_time DESC
+    </select>
+    <!--根据id查找活动-->
+    <select id="findById" resultMap="EventResultMap">
+        SELECT event_id,
+               title,
+               category,
+               location,
+               start_time,
+               end_time,
+               reg_deadline,
+               detail,
+               publisher_id,
+               is_active,
+               checkin_code
+        FROM t_event
+        WHERE event_id = #{eventId}
+    </select>
+    <!--根据-->
+    <select id="findByPublisherId" resultMap="EventResultMap">
+        SELECT event_id,
+               title,
+               category,
+               location,
+               start_time,
+               end_time,
+               reg_deadline,
+               detail,
+               publisher_id,
+               is_active,
+               checkin_code
+        FROM t_event
+        WHERE publisher_id = #{publisherId}
+        ORDER BY start_time DESC
+    </select>
+
+    <select id="findRegisteredByUserId" resultMap="EventResultMap">
+        SELECT e.event_id,
+               e.title,
+               e.category,
+               e.location,
+               e.start_time,
+               e.end_time,
+               e.reg_deadline,
+               e.detail,
+               e.publisher_id,
+               e.is_active,
+               e.checkin_code,
+               r.status         AS registration_status,
+               r.checkin_status AS checkin_status
+        FROM t_event e
+                 JOIN t_registration r
+                      ON e.event_id = r.event_id
+        WHERE r.user_id = #{userId}
+        ORDER BY r.reg_time DESC
+    </select>
+
+    <update id="updateCheckinCode">
+        UPDATE t_event
+        SET checkin_code = #{code}
+        WHERE event_id = #{eventId}
+    </update>
+
+    <sql id="searchConditions">
+        <where>
+            is_active = 1
+            <if test="keyword != null and keyword != ''">
+                AND (title LIKE CONCAT('%', #{keyword}, '%')
+                OR detail LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="location != null and location != ''">
+                AND location LIKE CONCAT('%', #{location}, '%')
+            </if>
+            <if test="startDate != null">
+                AND start_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND start_time &lt;= #{endDate}
+            </if>
+        </where>
+    </sql>
+
+    <select id="searchByPage" resultMap="EventResultMap">
+        SELECT event_id,
+        title,
+        category,
+        location,
+        start_time,
+        end_time,
+        reg_deadline,
+        detail,
+        publisher_id,
+        is_active,
+        checkin_code
+        FROM t_event
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="location != null and location != ''">
+                AND location = #{location}
+            </if>
+            <if test="startDate != null">
+                AND start_time <![CDATA[ >= ]]> #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND end_time <![CDATA[ <= ]]> #{endDate}
+            </if>
+        </where>
+        ORDER BY start_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+
+    <select id="countSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM t_event
+        <include refid="searchConditions"/>
+    </select>
+
+</mapper>

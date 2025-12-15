@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.seu.campus.event.registration.mapper.UserMapper">
+
+    <resultMap id="UserResultMap"
+               type="com.seu.campus.event.registration.model.User">
+        <id property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="realName" column="real_name"/>
+        <result property="role" column="role"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 根据用户名查询 -->
+    <select id="findByUsername"
+            resultMap="UserResultMap">
+        SELECT *
+        FROM t_user
+        WHERE username = #{username}
+        LIMIT 1
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="save"
+            parameterType="com.seu.campus.event.registration.model.User"
+            useGeneratedKeys="true"
+            keyProperty="userId">
+        INSERT INTO t_user (username,
+                            password,
+                            real_name,
+                            role,
+                            email,
+                            phone)
+        VALUES (#{username},
+                #{password},
+                #{realName},
+                #{role},
+                #{email},
+                #{phone})
+    </insert>
+
+    <!-- 更新用户信息 -->
+    <update id="update"
+            parameterType="com.seu.campus.event.registration.model.User">
+        UPDATE t_user
+        <set>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            update_time = NOW()
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+
+
+</mapper>

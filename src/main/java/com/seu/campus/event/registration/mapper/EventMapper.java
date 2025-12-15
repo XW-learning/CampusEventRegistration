@@ -1,6 +1,7 @@
 package com.seu.campus.event.registration.mapper;
 
 import com.seu.campus.event.registration.model.Event;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Date;
@@ -57,7 +58,7 @@ public interface EventMapper {
      * @param eventId 活动 ID
      * @param code    签到码
      */
-    void updateCheckinCode(Integer eventId, String code);
+    void updateCheckinCode(@Param("eventId") Integer eventId, @Param("code") String code);
 
     /**
      * 分页查询活动列表
@@ -65,7 +66,15 @@ public interface EventMapper {
      * @param offset   偏移量 (从第几条开始)
      * @param pageSize 每页条数
      */
-    List<Event> searchByPage(String keyword, String category, String location, Date startDate, Date endDate, int offset, int pageSize);
+    List<Event> searchByPage(
+            @Param("keyword") String keyword,
+            @Param("category") String category,
+            @Param("location") String location,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate,
+            @Param("offset") int offset,
+            @Param("pageSize") int pageSize
+    );
 
     /**
      * 统计搜索结果数量
@@ -77,6 +86,12 @@ public interface EventMapper {
      * @param endDate   结束时间
      * @return 搜索结果数量
      */
-    int countSearch(String keyword, String category, String location, Date startDate, Date endDate);
+    int countSearch(
+            @Param("keyword") String keyword,
+            @Param("category") String category,
+            @Param("location") String location,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate
+    );
 
 }

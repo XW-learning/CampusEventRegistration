@@ -1,14 +1,11 @@
 package com.seu.campus.event.registration.controller;
 
 import com.google.gson.Gson;
-import com.seu.campus.event.registration.mapper.EventMapper;
-import com.seu.campus.event.registration.mapper.impl.EventMapperImpl;
 import com.seu.campus.event.registration.model.Event;
 import com.seu.campus.event.registration.model.Registration;
 import com.seu.campus.event.registration.model.User;
 import com.seu.campus.event.registration.service.RegistrationService;
 import com.seu.campus.event.registration.service.impl.RegistrationServiceImpl;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 活动报名管理
@@ -34,7 +30,6 @@ import java.util.Objects;
 @WebServlet(name = "RegistrationServlet", value = "/registration-action")
 public class RegistrationServlet extends HttpServlet {
     private final RegistrationService registrationService = new RegistrationServiceImpl();
-    private final EventMapper eventMapper = new EventMapperImpl();
     private final Gson gson = new Gson();
 
     @Override
@@ -119,7 +114,8 @@ public class RegistrationServlet extends HttpServlet {
 
         Integer eventId = Integer.parseInt(req.getParameter("eventId"));
         List<Registration> list = registrationService.getRegistrationList(currentUser.getUserId(), eventId);
-        Event event = eventMapper.findById(eventId);
+        Event event = registrationService.getEventById(eventId);
+
 
         // 1. 校验数据是否存在
         if (list == null || list.isEmpty() || event == null) {
@@ -135,7 +131,7 @@ public class RegistrationServlet extends HttpServlet {
         resp.setContentType("text/csv; charset=UTF-8");
 
         PrintWriter out = resp.getWriter();
-        out.write('\ufeff'); // BOM 头
+        out.write('\ufeff');
 
         // 🟢 修改表头：增加 "签到状态"
         out.println("报名ID,联系人姓名,联系电话,报名时间,状态,签到状态");

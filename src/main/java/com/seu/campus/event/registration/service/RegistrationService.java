@@ -1,5 +1,6 @@
 package com.seu.campus.event.registration.service;
 
+import com.seu.campus.event.registration.model.Event;
 import com.seu.campus.event.registration.model.Registration;
 
 import java.util.List;
@@ -63,5 +64,14 @@ public interface RegistrationService {
      * @return 处理结果
      */
     String reJoin(Integer userId, Integer eventId);
+
+    /**
+     * 获取活动信息
+     *
+     * @param eventId 活动ID
+     * @return 活动信息
+     */
+    Event getEventById(Integer eventId);
+
 
 }

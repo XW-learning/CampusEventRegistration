@@ -19,23 +19,15 @@ public class Event {
     private String detail;
     private Integer publisherId;
     private Integer isActive;
-
-    // 🟢 新增字段 1：用于存储当前用户的报名状态
+    private String checkinCode;
     private String registrationStatus;
 
-    // 🟢 新增字段 2: 数据库的签到码 (t_event.checkin_code)
-    private String checkinCode;
-
-    // 🟢 新增字段 3: 告诉前端是否有码 (虚拟字段，不存库)
     private boolean hasCheckinCode;
-
-    // 🟢 新增字段 4: 当前用户的签到状态 (0:未签, 1:已签)，来自 t_registration
     private Integer checkinStatus;
 
     public Event() {
     }
 
-    // --- Getter / Setter ---
 
     public Integer getEventId() {
         return eventId;

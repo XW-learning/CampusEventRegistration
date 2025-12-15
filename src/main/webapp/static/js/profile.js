@@ -288,9 +288,10 @@ function viewRegistrations(eventId) {
     const exportBtn = $('#export-btn');
     $('#list-current-eventId').val(eventId);
     modal.removeClass('hidden');
-    tbody.html('<tr><td colspan="5" class="text-center py-10 text-gray-400">正在加载数据...</td></tr>');
 
-    // ❌ 替换 alert
+    // ✅ 修改 1：将 colspan="5" 改为 6
+    tbody.html('<tr><td colspan="6" class="text-center py-10 text-gray-400">正在加载数据...</td></tr>');
+
     exportBtn.off('click').click(function () {
         showToast("数据加载中...", "info");
     }).addClass('opacity-50 cursor-not-allowed');
@@ -311,18 +312,18 @@ function viewRegistrations(eventId) {
                     });
                 } else {
                     exportBtn.click(function () {
-                        // ❌ 替换 alert
                         showToast("暂无数据可导出", "info");
                     });
                 }
             } else {
-                tbody.html(`<tr><td colspan="5" class="text-center py-10 text-red-500">${res.message}</td></tr>`);
+                // ✅ 修改 2：将 colspan="5" 改为 6
+                tbody.html(`<tr><td colspan="6" class="text-center py-10 text-red-500">${res.message}</td></tr>`);
             }
         },
         error: function () {
-            // ❌ 替换 alert
             showToast("名单加载失败，请检查网络", "error");
-            tbody.html('<tr><td colspan="5" class="text-center py-10 text-red-500">加载失败</td></tr>');
+            // ✅ 修改 3：将 colspan="5" 改为 6
+            tbody.html('<tr><td colspan="6" class="text-center py-10 text-red-500">加载失败</td></tr>');
         }
     });
 }
@@ -333,11 +334,26 @@ function renderRegistrationList(list) {
     $('#checkbox-all').prop('checked', false);
 
     if (!list || list.length === 0) {
-        tbody.html('<tr><td colspan="5" class="text-center py-10 text-gray-400 flex flex-col items-center"><span class="text-2xl mb-2">🍃</span><span>暂无学生报名</span></td></tr>');
+        // ✅ 核心修改：
+        // 1. colspan="6"
+        // 2. 移除 td 上的 flex 类，改为在内部嵌套一个 div 来居中
+        tbody.html(`
+            <tr>
+                <td colspan="6" class="py-12">
+                    <div class="flex flex-col items-center justify-center text-gray-400">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                            <span class="text-3xl">🍃</span>
+                        </div>
+                        <span class="text-sm">暂无学生报名</span>
+                    </div>
+                </td>
+            </tr>
+        `);
         return;
     }
 
     list.forEach(reg => {
+        // ... (后续渲染代码保持不变) ...
         let regTimeStr = '-';
         if (reg.regTime) {
             let date = new Date(reg.regTime.replace('T', ' ').replace(/-/g, '/'));

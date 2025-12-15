@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.seu.campus.event.registration.mapper.RegistrationMapper">
+
+    <resultMap id="RegistrationResultMap"
+               type="com.seu.campus.event.registration.model.Registration">
+        <id property="regId" column="reg_id"/>
+        <result property="eventId" column="event_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="regTime" column="reg_time"/>
+        <result property="status" column="status"/>
+        <result property="isSignedIn" column="is_signed_in"/>
+        <result property="contactName" column="contact_name"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="checkinStatus" column="checkin_status"/>
+        <result property="checkinTime" column="checkin_time"/>
+        <result property="reJoinCount" column="re_join_count"/>
+    </resultMap>
+
+    <insert id="save"
+            parameterType="com.seu.campus.event.registration.model.Registration"
+            useGeneratedKeys="true"
+            keyProperty="regId">
+        INSERT INTO t_registration (
+            event_id,
+            user_id,
+            contact_name,
+            contact_phone,
+            status,
+            reg_time,
+            checkin_status,
+            re_join_count
+        )
+        VALUES (
+                   #{eventId},
+                   #{userId},
+                   #{contactName},
+                   #{contactPhone},
+                   IFNULL(#{status}, 'pending'),
+                   NOW(),
+                   0,
+                   0
+               )
+    </insert>
+
+    <select id="findByEventIdAndUserId" resultMap="RegistrationResultMap">
+        SELECT *
+        FROM t_registration
+        WHERE event_id = #{eventId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findByEventId" resultMap="RegistrationResultMap">
+        SELECT *
+        FROM t_registration
+        WHERE event_id = #{eventId}
+          AND status != 'cancelled'
+        ORDER BY reg_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE t_registration
+        SET status = #{status}
+        WHERE reg_id = #{regId}
+    </update>
+
+    <update id="cancel">
+        UPDATE t_registration
+        SET status = 'cancelled',
+            cancel_reason = #{reason}
+        WHERE user_id = #{userId}
+          AND event_id = #{eventId}
+    </update>
+
+    <update id="updateCheckinStatus">
+        UPDATE t_registration
+        SET checkin_status = #{status},
+            checkin_time   = #{time}
+        WHERE user_id = #{userId}
+          AND event_id = #{eventId}
+    </update>
+
+    <update id="reJoin">
+        UPDATE t_registration
+        SET status = 'pending',
+            re_join_count = re_join_count + 1
+        WHERE user_id = #{userId}
+          AND event_id = #{eventId}
+    </update>
+
+</mapper>
