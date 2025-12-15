@@ -11,6 +11,7 @@ import java.io.InputStream;
 /**
  * MyBatis 工具类
  * 负责 SqlSessionFactory 的创建与 SqlSession 的获取
+ * @author XW
  */
 public class MyBatisUtil {
 
@@ -26,7 +27,9 @@ public class MyBatisUtil {
         }
     }
 
-    /** 获取 SqlSession（手动提交事务） */
+    /**
+     * 获取 SqlSession（手动提交事务）
+     */
     public static SqlSession openSession() {
         return SQL_SESSION_FACTORY.openSession();
     }

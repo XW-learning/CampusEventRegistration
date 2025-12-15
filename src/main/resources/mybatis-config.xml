@@ -3,6 +3,12 @@
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+    <typeAliases>
+        <typeAlias alias="Event" type="com.seu.campus.event.registration.model.Event"/>
+        <typeAlias alias="Registration" type="com.seu.campus.event.registration.model.Registration"/>
+        <typeAlias alias="User" type="com.seu.campus.event.registration.model.User"/>
+    </typeAliases>
+
     <environments default="development">
         <environment id="development">
             <transactionManager type="JDBC"/>
@@ -21,9 +27,5 @@
         <mapper resource="mapper/EventMapper.xml"/>
         <mapper resource="mapper/RegistrationMapper.xml"/>
     </mappers>
-    <typeAliases>
-        <typeAlias alias="Event" type="com.seu.campus.event.registration.model.Event"/>
-        <typeAlias alias="Registration" type="com.seu.campus.event.registration.model.Registration"/>
-        <typeAlias alias="User" type="com.seu.campus.event.registration.model.User"/>
-    </typeAliases>
+
 </configuration>

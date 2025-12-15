@@ -23,7 +23,7 @@ public interface EventService {
      *
      * @return 活动列表
      */
-    List<Event> findAllActiveEvents(); // <-- 新增
+    List<Event> findAllActiveEvents();
 
     /**
      * 获取我的相关活动
