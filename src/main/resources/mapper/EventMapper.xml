@@ -6,7 +6,7 @@
 <mapper namespace="com.seu.campus.event.registration.mapper.EventMapper">
 
     <resultMap id="EventResultMap"
-               type="com.seu.campus.event.registration.model.Event">
+               type="Event">
         <id property="eventId" column="event_id"/>
         <result property="title" column="title"/>
         <result property="category" column="category"/>
@@ -24,7 +24,7 @@
 
     <!--新增活动-->
     <insert id="save"
-            parameterType="com.seu.campus.event.registration.model.Event"
+            parameterType="Event"
             useGeneratedKeys="true"
             keyProperty="eventId">
         INSERT INTO t_event (title,

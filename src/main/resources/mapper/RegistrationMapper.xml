@@ -6,7 +6,7 @@
 <mapper namespace="com.seu.campus.event.registration.mapper.RegistrationMapper">
 
     <resultMap id="RegistrationResultMap"
-               type="com.seu.campus.event.registration.model.Registration">
+               type="Registration">
         <id property="regId" column="reg_id"/>
         <result property="eventId" column="event_id"/>
         <result property="userId" column="user_id"/>
@@ -22,7 +22,7 @@
     </resultMap>
 
     <insert id="save"
-            parameterType="com.seu.campus.event.registration.model.Registration"
+            parameterType="Registration"
             useGeneratedKeys="true"
             keyProperty="regId">
         INSERT INTO t_registration (

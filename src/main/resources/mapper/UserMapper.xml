@@ -6,7 +6,7 @@
 <mapper namespace="com.seu.campus.event.registration.mapper.UserMapper">
 
     <resultMap id="UserResultMap"
-               type="com.seu.campus.event.registration.model.User">
+               type="User">
         <id property="userId" column="user_id"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
@@ -27,7 +27,7 @@
 
     <!-- 新增用户 -->
     <insert id="save"
-            parameterType="com.seu.campus.event.registration.model.User"
+            parameterType="User"
             useGeneratedKeys="true"
             keyProperty="userId">
         INSERT INTO t_user (username,
@@ -46,7 +46,7 @@
 
     <!-- 更新用户信息 -->
     <update id="update"
-            parameterType="com.seu.campus.event.registration.model.User">
+            parameterType="User">
         UPDATE t_user
         <set>
             <if test="password != null and password != ''">
@@ -62,7 +62,6 @@
         </set>
         WHERE user_id = #{userId}
     </update>
-
 
 
 </mapper>

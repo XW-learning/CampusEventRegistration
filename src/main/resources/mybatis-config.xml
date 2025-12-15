@@ -21,4 +21,9 @@
         <mapper resource="mapper/EventMapper.xml"/>
         <mapper resource="mapper/RegistrationMapper.xml"/>
     </mappers>
+    <typeAliases>
+        <typeAlias alias="Event" type="com.seu.campus.event.registration.model.Event"/>
+        <typeAlias alias="Registration" type="com.seu.campus.event.registration.model.Registration"/>
+        <typeAlias alias="User" type="com.seu.campus.event.registration.model.User"/>
+    </typeAliases>
 </configuration>
