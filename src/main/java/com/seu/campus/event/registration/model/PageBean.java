@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * 分页结果封装类
+ *
  * @param <T> 数据类型 (这里是 Event)
  */
 public class PageBean<T> {
@@ -25,14 +26,43 @@ public class PageBean<T> {
     }
 
     // Getter Setter
-    public int getCurrentPage() { return currentPage; }
-    public void setCurrentPage(int currentPage) { this.currentPage = currentPage; }
-    public int getPageSize() { return pageSize; }
-    public void setPageSize(int pageSize) { this.pageSize = pageSize; }
-    public int getTotalCount() { return totalCount; }
-    public void setTotalCount(int totalCount) { this.totalCount = totalCount; }
-    public int getTotalPage() { return totalPage; }
-    public void setTotalPage(int totalPage) { this.totalPage = totalPage; }
-    public List<T> getList() { return list; }
-    public void setList(List<T> list) { this.list = list; }
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(int totalCount) {
+        this.totalCount = totalCount;
+    }
+
+    public int getTotalPage() {
+        return totalPage;
+    }
+
+    public void setTotalPage(int totalPage) {
+        this.totalPage = totalPage;
+    }
+
+    public List<T> getList() {
+        return list;
+    }
+
+    public void setList(List<T> list) {
+        this.list = list;
+    }
 }

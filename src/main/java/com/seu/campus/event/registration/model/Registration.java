@@ -21,6 +21,7 @@ public class Registration {
     private Integer checkinStatus;
     private Date checkinTime;
     private Integer reJoinCount;
+
     // 无参构造
     public Registration() {
     }

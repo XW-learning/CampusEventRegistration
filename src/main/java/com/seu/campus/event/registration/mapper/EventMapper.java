@@ -58,7 +58,8 @@ public interface EventMapper {
      * @param eventId 活动 ID
      * @param code    签到码
      */
-    void updateCheckinCode(@Param("eventId") Integer eventId, @Param("code") String code);
+    void updateCheckinCode(@Param("eventId") Integer eventId,
+                           @Param("code") String code);
 
     /**
      * 分页查询活动列表

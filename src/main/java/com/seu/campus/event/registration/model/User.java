@@ -3,16 +3,18 @@ package com.seu.campus.event.registration.model;
 /**
  * 用户实体类
  * 对应数据库表: t_user
+ *
+ * @author XW
  */
 public class User {
     // 1. 私有属性 (对应 DB 字段)
-    private Integer userId;      // user_id
-    private String username;     // username
-    private String password;     // password
-    private String realName;     // real_name
-    private String role;         // role (student/organizer)
-    private String email;        // email
-    private String phone;        // phone
+    private Integer userId;
+    private String username;
+    private String password;
+    private String realName;
+    private String role;
+    private String email;
+    private String phone;
 
     // 2. 无参构造函数 (反射必须)
     public User() {
