@@ -29,11 +29,7 @@ import java.util.Map;
 @WebServlet(name = "EventServlet", value = "/event-action")
 public class EventServlet extends HttpServlet {
     private final EventService eventService = new EventServiceImpl();
-    // 修改 Gson 的初始化，设置日期格式，否则传给前端的是怪异的字符串
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-
-    public EventServlet() throws IOException {
-    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

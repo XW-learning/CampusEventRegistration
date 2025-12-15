@@ -13,6 +13,8 @@ import java.io.IOException;
  * 权限过滤器
  * 作用：拦截对 publish.html 的直接访问
  * 规则：只有已登录且角色为 'organizer' 的用户才能访问
+ *
+ * @author XW
  */
 // 🟢 关键注解：urlPatterns 指定要拦截的路径
 @WebFilter(filterName = "OrganizerFilter", urlPatterns = {"/publish.html"})
